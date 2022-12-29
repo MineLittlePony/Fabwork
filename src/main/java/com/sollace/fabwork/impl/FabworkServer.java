@@ -2,6 +2,7 @@ package com.sollace.fabwork.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
@@ -10,25 +11,47 @@ import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Streams;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.*;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.network.ClientConnection;
 import net.minecraft.util.Identifier;
 
 public class FabworkServer implements ModInitializer {
-    public static final Logger LOGGER = LogManager.getLogger("Fabwork");
+    public static final Logger LOGGER = LogManager.getLogger("Fabwork::SERVER");
     public static final Identifier CONSENT_ID = id("synchronize");
     public static final int PROTOCOL_VERSION = 1;
+
+    private static final Executor VERIFY_EXECUTOR = CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS);
 
     @Override
     public void onInitialize() {
         final FabworkConfig config = FabworkConfig.load(FabricLoader.getInstance().getConfigDir().resolve("fabwork.json"));
+        final Map<ClientConnection, SynchronisationState> clientLoginStates = new HashMap<>();
+        final SynchronisationState emptyState = new SynchronisationState(Stream.empty(),
+                makeDistinct(Streams.concat(FabworkImpl.INSTANCE.getInstalledMods().filter(ModEntryImpl::requiredOnEither), config.getCustomRequiredMods()))
+        );
+
+        ServerPlayNetworking.registerGlobalReceiver(CONSENT_ID, (server, player, handler, buffer, response) -> {
+            LOGGER.info("Received synchronize response from client " + handler.getConnection().getAddress().toString());
+            clientLoginStates.put(handler.getConnection(), new SynchronisationState(ModEntryImpl.read(buffer), emptyState.installedOnServer().stream()));
+        });
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            LOGGER.info("Sending synchronize packet to " + handler.getPlayer().getName().getString());
+            LOGGER.info("Sending synchronize packet to " + handler.getConnection().getAddress().toString());
             sender.sendPacket(CONSENT_ID, ModEntryImpl.write(
-                    makeDistinct(Streams.concat(FabworkImpl.INSTANCE.getInstalledMods().filter(ModEntryImpl::requiredOnEither), config.getCustomRequiredMods())),
+                    emptyState.installedOnServer().stream(),
                     PacketByteBufs.create())
             );
+
+            VERIFY_EXECUTOR.execute(() -> {
+                server.execute(() -> {
+                    LOGGER.info("Performing verify of client's installed mods " + handler.getConnection().getAddress().toString());
+                    if (clientLoginStates.containsKey(handler.getConnection())) {
+                        clientLoginStates.remove(handler.getConnection()).verify(handler.getConnection(), LOGGER);
+                    } else {
+                        emptyState.verify(handler.getConnection(), LOGGER);
+                    }
+                });
+            });
         });
     }
 
