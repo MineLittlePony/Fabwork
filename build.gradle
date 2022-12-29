@@ -77,7 +77,7 @@ modrinth {
     //featured = true
     versionNumber = version.toString()
     versionName = archivesBaseName + '-' + version
-    changelog = "[Changelog](https://github.com/MineLittlePony/Fabwork/releases/tag/${version.toString()})"
+    changelog = "[Changelog](https://github.com/Sollace/Fabwork/releases/tag/${version.toString()})"
     uploadFile = remapJar
     outlet.mcVersions().each{ver ->
       gameVersions.add ver
@@ -108,9 +108,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:git://github.com/MineLittlePony/Fabwork.git'
-                    developerConnection = 'scm:git:ssh://github.com/MineLittlePony/Fabwork.git'
-                    url = 'https://github.com/MineLittlePony/Fabwork'
+                    connection = 'scm:git:git://github.com/Sollace/Fabwork.git'
+                    developerConnection = 'scm:git:ssh://github.com/Sollace/Fabwork.git'
+                    url = 'https://github.com/Sollace/Fabwork'
                 }
             }
         }

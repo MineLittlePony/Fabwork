@@ -42,12 +42,15 @@ public class FabworkServer implements ModInitializer {
                     PacketByteBufs.create())
             );
 
+            // TODO: Need a better way to wait for the client's response/non-response
+            //       PlayPingS2CPacket maybe?
             VERIFY_EXECUTOR.execute(() -> {
                 server.execute(() -> {
                     LOGGER.info("Performing verify of client's installed mods " + handler.getConnection().getAddress().toString());
                     if (clientLoginStates.containsKey(handler.getConnection())) {
                         clientLoginStates.remove(handler.getConnection()).verify(handler.getConnection(), LOGGER);
                     } else {
+                        LOGGER.info("Client failed to respond to challenge. Assuming vanilla client " + handler.getConnection().getAddress().toString());
                         emptyState.verify(handler.getConnection(), LOGGER);
                     }
                 });
