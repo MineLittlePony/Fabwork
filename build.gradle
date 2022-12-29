@@ -1,0 +1,130 @@
+buildscript {
+    dependencies {
+        classpath 'com.github.dexman545:Outlet:1.3.10'
+    }
+}
+plugins {
+    id 'fabric-loom' version '0.12-SNAPSHOT'
+    id 'maven-publish'
+    id 'com.modrinth.minotaur' version '2.+'
+    id 'org.ajoberstar.reckon' version '0.13.0'
+}
+apply plugin: 'dex.plugins.outlet'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    withSourcesJar()
+}
+
+outlet.allowSnapshotsForProject = false
+outlet.mcVersionRange = project.minecraft_version_range
+
+group = project.group
+description = project.displayname
+archivesBaseName = project.name
+
+loom {
+    mixin.defaultRefmapName = 'fabwork.mixin.refmap.json'
+}
+
+reckon {
+    scopeFromProp()
+    stageFromProp('beta', 'rc', 'final')
+}
+
+repositories {
+    maven {
+        name = 'modmenu'
+        url = 'https://maven.terraformersmc.com/releases'
+    }
+    mavenLocal()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modApi "net.fabricmc:fabric-loader:${project.loader_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+}
+
+processResources {
+    inputs.property "version", project.version.toString()
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version.toString()
+    }
+
+    from 'LICENSE'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+tasks.modrinth {
+    onlyIf {
+      def stage = version.version.stage.value
+      stage == null || stage.name != 'beta'
+    }
+}
+
+modrinth {
+    token = System.env.MODRINTH_KEY
+    projectId = project.modrinth_project_id
+    //featured = true
+    versionNumber = version.toString()
+    versionName = archivesBaseName + '-' + version
+    changelog = "[Changelog](https://github.com/MineLittlePony/Fabwork/releases/tag/${version.toString()})"
+    uploadFile = remapJar
+    outlet.mcVersions().each{ver ->
+      gameVersions.add ver
+    }
+    dependencies {
+       required.project 'P7dR8mSH'
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+
+            pom {
+                name = "Fabwork"
+                description = "Enhanced Networking API for Fabric"
+                url = "http://minelittlepony-mod.com"
+                licenses {
+                    license {
+                        name = "MIT Public License"
+                        url = "https://tlo.mit.edu/learn-about-intellectual-property/software-and-open-source-licensing"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "sollace"
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/MineLittlePony/Fabwork.git'
+                    developerConnection = 'scm:git:ssh://github.com/MineLittlePony/Fabwork.git'
+                    url = 'https://github.com/MineLittlePony/Fabwork'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "Fabwork"
+            def stage = version.version.stage.value
+            url = "s3://repo.minelittlepony-mod.com/maven/${stage != null && stage.name == 'beta' ? 'snapshot' : 'release'}"
+            credentials(AwsCredentials) {
+                accessKey = System.env.ACCESS_KEY
+                secretKey = System.env.SECRET_KEY
+            }
+        }
+    }
+}
