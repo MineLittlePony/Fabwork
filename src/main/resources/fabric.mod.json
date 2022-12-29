@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "fabwork",
+  "version": "${version}",
+  "name": "Fabwork",
+  "description": "Enhanced Networking for Fabric",
+  "authors": [ "Sollace" ],
+  "contact": {
+    "homepage": "https://minelittlepony-mod.com/",
+    "sources": "http://github.com/MineLittlePony/Fabwork",
+    "issues": "https://github.com/MineLittlePony/Fabwork/issues"
+  },
+  "license": "MIT",
+  "icon": "fabwork_logo.png",
+  "entrypoints": {
+    "main": [
+      "com.sollace.fabwork.impl.FabworkServer"
+    ],
+    "client": [
+      "com.sollace.fabwork.impl.FabworkClientImpl"
+    ]
+  },
+  "mixins": [ ],
+  "depends": {
+    "fabricloader": ">=0.12.0",
+    "java": ">=17",
+    "fabric": "*"
+  },
+  "suggests": {
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/zKSZ8Mg"
+      }
+    }
+  }
+}
