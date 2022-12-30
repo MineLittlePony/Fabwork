@@ -20,10 +20,10 @@ fabric.mod.json
 ```
 {
   "custom": {
-	    "fabwork": {
-			  "requiredOn": "<*|client|server>"
-			}
-	}
+      "fabwork": {
+        "requiredOn": "<*|client|server>"
+      }
+  }
 }
 ```
 
@@ -38,8 +38,8 @@ fabwork.json
 ```
 {
   "requiredModIds": [
-	  "fabric", ...
-	]
+    "fabric", ...
+  ]
 }
 ```
 
@@ -54,10 +54,10 @@ class ExampleMod {
   // registration
   C2SPacketType<ExamplePacket> EXAMPLE = SimpleNetworking.clientToServer(new Identifier("modid", "example"), ExamplePacket::new);
 
-	static void example() {
-	  // usage (on client)
-		EXAMPLE.sendToServer(new ExamplePacket(1));
-	}
+  static void example() {
+    // usage (on client)
+    EXAMPLE.sendToServer(new ExamplePacket(1));
+  }
 }
 
 class ExamplePacket extends Packet<ServerPlayerEntity> {
@@ -65,21 +65,21 @@ class ExamplePacket extends Packet<ServerPlayerEntity> {
   private int parameter;
 
   ExamplePacket(int parameter) {
-	  this.parameter = parameter;
-	}
-	
-	ExamplePacket(PacketByteBuf buffer) {
-	  this(buffer.readInt());
-	}
-	
-	public void toBuffer(PacketByteBuf buffer) {
-	  buffer.writeInt(parameter);
-	}
+    this.parameter = parameter;
+  }
+  
+  ExamplePacket(PacketByteBuf buffer) {
+    this(buffer.readInt());
+  }
+  
+  public void toBuffer(PacketByteBuf buffer) {
+    buffer.writeInt(parameter);
+  }
 
   @Override
   public void handle(ServerPlayerEntity sender) {
-	  // callback executed when receiving your packet
-	}
+    // callback executed when receiving your packet
+  }
 }
 ```
 
