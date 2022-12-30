@@ -39,7 +39,7 @@ public class FabworkClientImpl implements ClientModInitializer {
         });
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             LOGGER.info("Performing verify of server's installed mods " + handler.hashCode());
-            STATE.verify(handler.getConnection(), LOGGER);
+            STATE.verify(handler.getConnection(), LOGGER, true);
         });
     }
 }

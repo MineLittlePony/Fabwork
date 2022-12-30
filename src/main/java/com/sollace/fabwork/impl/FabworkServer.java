@@ -42,10 +42,10 @@ public class FabworkServer implements ModInitializer {
             PlayPingSynchroniser.waitForClientResponse(handler.getConnection(), responseType -> {
                 LOGGER.info("Performing verify of client's installed mods " + handler.getConnection().getAddress().toString());
                 if (clientLoginStates.containsKey(handler.getConnection())) {
-                    clientLoginStates.remove(handler.getConnection()).verify(handler.getConnection(), LOGGER);
+                    clientLoginStates.remove(handler.getConnection()).verify(handler.getConnection(), LOGGER, true);
                 } else {
                     LOGGER.info("Client failed to respond to challenge. Assuming vanilla client " + handler.getConnection().getAddress().toString());
-                    emptyState.verify(handler.getConnection(), LOGGER);
+                    emptyState.verify(handler.getConnection(), LOGGER, false);
                 }
             });
         });

@@ -21,7 +21,7 @@ record SynchronisationState(
         this(installedOnClient.toList(), installedOnServer.toList());
     }
 
-    public boolean verify(ClientConnection connection, Logger logger) {
+    public boolean verify(ClientConnection connection, Logger logger, boolean useTranslation) {
         Set<String> missingOnServer = getDifference(installedOnClient.stream().filter(c -> c.requirement().isRequiredOnServer()), installedOnServer);
         Set<String> missingOnClient = getDifference(installedOnServer.stream().filter(c -> c.requirement().isRequiredOnClient()), installedOnClient);
 
@@ -30,7 +30,7 @@ record SynchronisationState(
         });
 
         if (!missingOnServer.isEmpty() || !missingOnClient.isEmpty()) {
-            Text errorMessage = createErrorMessage(missingOnServer, missingOnClient);
+            Text errorMessage = createErrorMessage(missingOnServer, missingOnClient, useTranslation);
             logger.error(errorMessage.getString());
             connection.disconnect(errorMessage);
             return false;
@@ -50,18 +50,27 @@ record SynchronisationState(
                 .collect(Collectors.toSet());
     }
 
-    private Text createErrorMessage(Set<String> missingOnServer, Set<String> missingOnClient) {
+    private Text createErrorMessage(Set<String> missingOnServer, Set<String> missingOnClient, boolean useTranslation) {
         String serverMissing = String.join(", ", missingOnServer.stream().toArray(CharSequence[]::new));
         String clientMissing = String.join(", ", missingOnClient.stream().toArray(CharSequence[]::new));
 
         if (missingOnClient.isEmpty()) {
-            return Text.translatable("fabwork.error.server_missing_mods", serverMissing);
+            return Text.translatable(
+                    useTranslation ? "fabwork.error.server_missing_mods" : "Server is missing required mod(s). Remove these from your client to join this server. [%s]",
+                    serverMissing
+            );
         }
 
         if (missingOnServer.isEmpty()) {
-            return Text.translatable("fabwork.error.client_missing_mods", clientMissing);
+            return Text.translatable(
+                    useTranslation ? "fabwork.error.client_missing_mods" : "Client is missing required mod(s). Add these to your client to join this server. [%s]",
+                    clientMissing
+            );
         }
 
-        return Text.translatable("fabwork.error.both_missing_mods", clientMissing, serverMissing);
+        return Text.translatable(
+                useTranslation ? "fabwork.error.both_missing_mods" : "Client and Server are missing required mod(s). Client needs to install [%s] and remove [%s] in order to join this server.",
+                clientMissing, serverMissing
+        );
     }
 }
