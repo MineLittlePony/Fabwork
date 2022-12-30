@@ -5,6 +5,15 @@ import java.util.stream.Stream;
 import com.sollace.fabwork.api.ModEntry;
 import com.sollace.fabwork.impl.FabworkClientImpl;
 
+/**
+*
+* Client-Specific methods for working with Fabwork's network requirements API.
+* For common client/server methods, see {@link Fabwork}
+*
+* @author Sollace
+*
+* @see com.sollace.fabwork.api.Fabwork
+*/
 public interface FabworkClient {
     FabworkClient INSTANCE = FabworkClientImpl.INSTANCE;
 

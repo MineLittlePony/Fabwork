@@ -2,6 +2,7 @@ package com.sollace.fabwork.api.packets;
 
 import java.util.function.Function;
 
+import com.sollace.fabwork.impl.ReceiverImpl;
 import com.sollace.fabwork.impl.packets.ClientSimpleNetworkingImpl;
 import com.sollace.fabwork.impl.packets.ServerSimpleNetworkingImpl;
 
@@ -44,8 +45,7 @@ public interface SimpleNetworking {
      * @return A registered PacketType
      */
     static <T extends Packet<ServerPlayerEntity>> C2SPacketType<T> clientToServer(Identifier id, Function<PacketByteBuf, T> factory) {
-        ServerSimpleNetworkingImpl.register(id, factory);
-        return new C2SPacketType<>(id);
+        return ServerSimpleNetworkingImpl.register(id, factory);
     }
     /**
      * Registers a packet type for transmission to the client.
@@ -60,8 +60,8 @@ public interface SimpleNetworking {
      */
     static <T extends Packet<PlayerEntity>> S2CPacketType<T> serverToClient(Identifier id, Function<PacketByteBuf, T> factory) {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientSimpleNetworkingImpl.register(id, factory);
+            return ClientSimpleNetworkingImpl.register(id, factory);
         }
-        return new S2CPacketType<>(id);
+        return new S2CPacketType<>(id, factory, ReceiverImpl.empty(id));
     }
 }

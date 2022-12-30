@@ -2,10 +2,31 @@ package com.sollace.fabwork.api;
 
 import java.util.Locale;
 
+/**
+ * An installation requirement used to indicate in which environments a mod needs to be available
+ * on to allow client-server interplay.
+ *
+ * Default for all mods that don't provide their own requirement value is "NONE"
+ */
 public enum RequirementType {
+    /**
+     * Default
+     *
+     * No requirement. Connection is allowed to continue regardless of whether the mod
+     * is present on either the client or server.
+     */
     NONE,
+    /**
+     * Mod is required only on the client
+     */
     CLIENT,
+    /**
+     * Mod is required only on the server
+     */
     SERVER,
+    /**
+     * Mod is required on both client and server
+     */
     BOTH;
 
     public boolean requiredOnEither() {
