@@ -14,7 +14,7 @@ import net.minecraft.util.Identifier;
 
 public class ClientSimpleNetworkingImpl {
     public static <T extends Packet<PlayerEntity>> S2CPacketType<T> register(Identifier id, Function<PacketByteBuf, T> factory) {
-        ReceiverImpl<PlayerEntity, T> receiver = new ReceiverImpl<>();
+        ReceiverImpl<PlayerEntity, T> receiver = new ReceiverImpl<>(id);
         S2CPacketType<T> type = new S2CPacketType<>(id, factory, receiver);
         ClientPlayNetworking.registerGlobalReceiver(type.id(), (client, handler, buffer, responder) -> {
             T packet = type.constructor().apply(buffer);
