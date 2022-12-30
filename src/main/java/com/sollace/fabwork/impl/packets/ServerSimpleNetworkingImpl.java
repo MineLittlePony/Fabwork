@@ -8,7 +8,6 @@ import org.apache.http.ConnectionClosedException;
 
 import com.sollace.fabwork.api.packets.*;
 import com.sollace.fabwork.impl.PlayPingSynchroniser;
-import com.sollace.fabwork.impl.ReceiverImpl;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.ClientConnection;
@@ -17,6 +16,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
 public class ServerSimpleNetworkingImpl {
+    private ServerSimpleNetworkingImpl() { throw new RuntimeException("new ServerSimpleNetworkingImpl()"); }
+
     public static <T extends Packet<ServerPlayerEntity>> C2SPacketType<T> register(Identifier id, Function<PacketByteBuf, T> factory) {
         ReceiverImpl<ServerPlayerEntity, T> receiver = new ReceiverImpl<>(id);
         C2SPacketType<T> type = new C2SPacketType<>(id, factory, receiver);

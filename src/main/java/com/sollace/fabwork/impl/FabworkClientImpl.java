@@ -14,8 +14,8 @@ import net.fabricmc.fabric.api.client.networking.v1.*;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 
 public class FabworkClientImpl implements ClientModInitializer {
-    public static final Logger LOGGER = LogManager.getLogger("Fabwork::CLIENT");
-    static final SynchronisationState EMPTY_STATE = new SynchronisationState(FabworkImpl.INSTANCE.getInstalledMods(), Stream.empty());
+    private static final Logger LOGGER = LogManager.getLogger("Fabwork::CLIENT");
+    private static final SynchronisationState EMPTY_STATE = new SynchronisationState(FabworkImpl.INSTANCE.getInstalledMods(), Stream.empty());
 
     private static SynchronisationState STATE = EMPTY_STATE;
     public static final FabworkClient INSTANCE = () -> STATE.installedOnServer().stream();

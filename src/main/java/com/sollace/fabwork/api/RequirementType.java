@@ -7,6 +7,8 @@ import java.util.Locale;
  * on to allow client-server interplay.
  *
  * Default for all mods that don't provide their own requirement value is "NONE"
+ *
+ * @author Sollace
  */
 public enum RequirementType {
     /**

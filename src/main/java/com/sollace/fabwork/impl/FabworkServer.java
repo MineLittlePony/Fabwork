@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.Streams;
+import com.sollace.fabwork.api.Fabwork;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.*;
@@ -19,6 +20,8 @@ public class FabworkServer implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("Fabwork::SERVER");
     public static final Identifier CONSENT_ID = id("synchronize");
     public static final int PROTOCOL_VERSION = 1;
+
+    public static final Fabwork FABWORK = FabworkImpl.INSTANCE;
 
     @Override
     public void onInitialize() {
@@ -59,7 +62,7 @@ public class FabworkServer implements ModInitializer {
         return map.values().stream();
     }
 
-    public static Identifier id(String name) {
+    private static Identifier id(String name) {
         return new Identifier("fabwork", name);
     }
 }

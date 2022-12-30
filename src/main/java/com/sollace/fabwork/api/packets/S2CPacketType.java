@@ -43,7 +43,6 @@ public record S2CPacketType<T extends Packet<? extends PlayerEntity>> (
         }
     }
 
-
     /**
      * Repackages a fabwork packet into a normal Minecraft protocol packet suitable for sending to a connected client.
      */

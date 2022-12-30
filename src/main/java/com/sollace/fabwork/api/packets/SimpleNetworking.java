@@ -2,9 +2,7 @@ package com.sollace.fabwork.api.packets;
 
 import java.util.function.Function;
 
-import com.sollace.fabwork.impl.ReceiverImpl;
-import com.sollace.fabwork.impl.packets.ClientSimpleNetworkingImpl;
-import com.sollace.fabwork.impl.packets.ServerSimpleNetworkingImpl;
+import com.sollace.fabwork.impl.packets.*;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -62,6 +60,6 @@ public interface SimpleNetworking {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             return ClientSimpleNetworkingImpl.register(id, factory);
         }
-        return new S2CPacketType<>(id, factory, ReceiverImpl.empty(id));
+        return new S2CPacketType<>(id, factory, Receivers.empty(id));
     }
 }

@@ -9,17 +9,18 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.CustomValue;
 
-public class FabworkImpl implements Fabwork {
-    public static final FabworkImpl INSTANCE = new FabworkImpl();
+class FabworkImpl implements Fabwork {
     private static final String CUSTOM_VALUES_KEY = "fabwork";
     private static final String REQUIREMENT_KEY = "requiredOn";
 
+    static final FabworkImpl INSTANCE = new FabworkImpl();
+
     @Override
     public RequirementType getRequirementForMod(String modId) {
-        return FabricLoader.getInstance().getModContainer(modId).map(this::getRequirementFor).orElse(RequirementType.NONE);
+        return FabricLoader.getInstance().getModContainer(modId).map(FabworkImpl::getRequirementFor).orElse(RequirementType.NONE);
     }
 
-    public RequirementType getRequirementFor(ModContainer mod) {
+    static RequirementType getRequirementFor(ModContainer mod) {
         return Optional.ofNullable(mod.getMetadata().getCustomValue(CUSTOM_VALUES_KEY))
                 .map(CustomValue::getAsObject)
                 .map(v -> v.get(REQUIREMENT_KEY))

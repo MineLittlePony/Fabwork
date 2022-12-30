@@ -10,11 +10,11 @@ import com.sollace.fabwork.api.RequirementType;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.network.PacketByteBuf;
 
-public record ModEntryImpl(
+record ModEntryImpl(
         String modId, RequirementType requirement) implements ModEntry {
 
     public ModEntryImpl(ModContainer mod) {
-        this(mod.getMetadata().getId(), FabworkImpl.INSTANCE.getRequirementFor(mod));
+        this(mod.getMetadata().getId(), FabworkImpl.getRequirementFor(mod));
     }
 
     public ModEntryImpl(PacketByteBuf buffer) {

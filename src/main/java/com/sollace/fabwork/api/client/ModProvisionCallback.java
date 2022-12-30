@@ -6,9 +6,11 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
 /**
- * Represents a callback invoked after joining a server with this mod installed.
+ * Represents a callback invoked after joining a server supporting fabwork's protocol.
  * <p>
- * This event serves as a notification that the server supports functionality of a certain mod.
+ * This event serves as a notification of which mods the joined server supports.
+ *
+ * @author Sollace
  */
 public interface ModProvisionCallback {
     Event<ModProvisionCallback> EVENT = EventFactory.createArrayBacked(ModProvisionCallback.class, callbacks -> (entry, available) -> {

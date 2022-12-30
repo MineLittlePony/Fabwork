@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.gson.*;
 import com.sollace.fabwork.api.RequirementType;
 
-public class FabworkConfig {
+class FabworkConfig {
     private static final Gson GSON = new GsonBuilder().create();
 
     public static FabworkConfig load(Path path) {
@@ -33,7 +33,6 @@ public class FabworkConfig {
         } catch (IOException e) {}
         return config;
     }
-
 
     @Nullable
     public List<String> requiredModIds;
