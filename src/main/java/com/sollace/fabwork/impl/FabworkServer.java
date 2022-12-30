@@ -52,6 +52,7 @@ public class FabworkServer implements ModInitializer {
                 }
             });
         });
+        LoaderUtil.invokeEntryPoints("fabwork:main", ModInitializer.class, ModInitializer::onInitialize);
     }
 
     private static Stream<ModEntryImpl> makeDistinct(Stream<ModEntryImpl> entries) {

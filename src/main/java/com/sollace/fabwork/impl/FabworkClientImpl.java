@@ -41,5 +41,6 @@ public class FabworkClientImpl implements ClientModInitializer {
             LOGGER.debug("Performing verify of server's installed mods " + handler.hashCode());
             STATE.verify(handler.getConnection(), LOGGER, true);
         });
+        LoaderUtil.invokeEntryPoints("fabwork:client", ClientModInitializer.class, ClientModInitializer::onInitializeClient);
     }
 }
