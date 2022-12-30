@@ -55,7 +55,9 @@ public class ReceiverImpl<P extends PlayerEntity, T extends Packet<P>> implement
     public void onReceive(P sender, T packet) {
         persistentListeners.fire(sender, packet);
         listeners.fire(sender, packet);
-        packet.handle(sender);
+        if (packet instanceof HandledPacket) {
+            ((HandledPacket<P>)packet).handle(sender);
+        }
     }
 
     final class ListenerList {
