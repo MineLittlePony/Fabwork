@@ -2,7 +2,6 @@ package com.sollace.fabwork.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
@@ -20,8 +19,6 @@ public class FabworkServer implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("Fabwork::SERVER");
     public static final Identifier CONSENT_ID = id("synchronize");
     public static final int PROTOCOL_VERSION = 1;
-
-    private static final Executor VERIFY_EXECUTOR = CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS);
 
     @Override
     public void onInitialize() {
@@ -42,18 +39,14 @@ public class FabworkServer implements ModInitializer {
                     PacketByteBufs.create())
             );
 
-            // TODO: Need a better way to wait for the client's response/non-response
-            //       PlayPingS2CPacket maybe?
-            VERIFY_EXECUTOR.execute(() -> {
-                server.execute(() -> {
-                    LOGGER.info("Performing verify of client's installed mods " + handler.getConnection().getAddress().toString());
-                    if (clientLoginStates.containsKey(handler.getConnection())) {
-                        clientLoginStates.remove(handler.getConnection()).verify(handler.getConnection(), LOGGER);
-                    } else {
-                        LOGGER.info("Client failed to respond to challenge. Assuming vanilla client " + handler.getConnection().getAddress().toString());
-                        emptyState.verify(handler.getConnection(), LOGGER);
-                    }
-                });
+            PlayPingSynchroniser.waitForClientResponse(handler.getConnection(), responseType -> {
+                LOGGER.info("Performing verify of client's installed mods " + handler.getConnection().getAddress().toString());
+                if (clientLoginStates.containsKey(handler.getConnection())) {
+                    clientLoginStates.remove(handler.getConnection()).verify(handler.getConnection(), LOGGER);
+                } else {
+                    LOGGER.info("Client failed to respond to challenge. Assuming vanilla client " + handler.getConnection().getAddress().toString());
+                    emptyState.verify(handler.getConnection(), LOGGER);
+                }
             });
         });
     }
