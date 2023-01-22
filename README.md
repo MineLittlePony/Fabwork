@@ -91,7 +91,7 @@ for local use.
 
 1. `git clone https://github.com/Sollace/Fabwork.git`
 2. `cd Fabwork`
-3. `gradlew build publishToLocalMaven`
+3. `gradlew build publishToMavenLocal`
 3. Add `mavenLocal()` to your build.gradle's repositories block
 4. Add to your build.gradle's dependencies block:
 ```
