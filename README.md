@@ -54,7 +54,7 @@ like you would a block or item.
 class ExampleMod implements ModInitializer {
   // registration
   C2SPacketType<ExampleServerBoundPacket> EXAMPLE_SERVER_BOUND = SimpleNetworking.clientToServer(new Identifier("modid", "example_server_bound"), ExampleServerBoundPacket::new);
-	S2CPacketType<ExampleClientBoundPacket> EXAMPLE_CLIENT_BOUND = SimpleNetworking.serverToClient(new Identifier("modid", "example_client_bound"), ExampleClientBoundPacket::new);
+  S2CPacketType<ExampleClientBoundPacket> EXAMPLE_CLIENT_BOUND = SimpleNetworking.serverToClient(new Identifier("modid", "example_client_bound"), ExampleClientBoundPacket::new);
   @Override
   public void onInitialize() {
     // send packet to client
@@ -65,14 +65,14 @@ class ExampleMod implements ModInitializer {
 class ExampleModClient implements ClientModInitializer {
   @Override
   public void onInitializeClient() {
-	  EXAMPLE_CLIENT_BOUND.receiver().addPersistentListener(this::onExamplePacket);
-	}
+    EXAMPLE_CLIENT_BOUND.receiver().addPersistentListener(this::onExamplePacket);
+  }
 
-	private void onExamplePacket(PlayerEntity sender, ExampleClientBoundPacket packet) {
-			// do something
-			// send packet to server
-			EXAMPLE.sendToServer(new ExampleServerBoundPacket(packet.parameter));
-	}
+  private void onExamplePacket(PlayerEntity sender, ExampleClientBoundPacket packet) {
+      // do something
+      // send packet to server
+      EXAMPLE.sendToServer(new ExampleServerBoundPacket(packet.parameter));
+  }
 }
 
 record ExampleServerBoundPacket (int parameter) implements HandledPacket<ServerPlayerEntity> {
@@ -86,7 +86,7 @@ record ExampleServerBoundPacket (int parameter) implements HandledPacket<ServerP
   }
 
   // packets can optionally include their own handle method
-	// or you can defer handler registration to the receiver (helpful for server/client code separation)
+  // or you can defer handler registration to the receiver (helpful for server/client code separation)
   @Override
   public void handle(ServerPlayerEntity sender) {
     // callback executed when receiving your packet
