@@ -51,35 +51,56 @@ To register packets, call either SimpleNetworking.clientToServer or SimpleNetwor
 like you would a block or item.
 
 ```
-class ExampleMod {
+class ExampleMod implements ModInitializer {
   // registration
-  C2SPacketType<ExamplePacket> EXAMPLE = SimpleNetworking.clientToServer(new Identifier("modid", "example"), ExamplePacket::new);
-
-  static void example() {
-    // usage (on client)
-    EXAMPLE.sendToServer(new ExamplePacket(1));
+  C2SPacketType<ExampleServerBoundPacket> EXAMPLE_SERVER_BOUND = SimpleNetworking.clientToServer(new Identifier("modid", "example_server_bound"), ExampleServerBoundPacket::new);
+	S2CPacketType<ExampleClientBoundPacket> EXAMPLE_CLIENT_BOUND = SimpleNetworking.serverToClient(new Identifier("modid", "example_client_bound"), ExampleClientBoundPacket::new);
+  @Override
+  public void onInitialize() {
+    // send packet to client
+    EXAMPLE.sendToPlayer(new ExampleClientBoundPacket(1), aServerPlayerEntity);
   }
 }
 
-class ExamplePacket extends Packet<ServerPlayerEntity> {
+class ExampleModClient implements ClientModInitializer {
+  @Override
+  public void onInitializeClient() {
+	  EXAMPLE_CLIENT_BOUND.receiver().addPersistentListener(this::onExamplePacket);
+	}
 
-  private int parameter;
+	private void onExamplePacket(PlayerEntity sender, ExampleClientBoundPacket packet) {
+			// do something
+			// send packet to server
+			EXAMPLE.sendToServer(new ExampleServerBoundPacket(packet.parameter));
+	}
+}
 
-  ExamplePacket(int parameter) {
-    this.parameter = parameter;
-  }
-  
-  ExamplePacket(PacketByteBuf buffer) {
+record ExampleServerBoundPacket (int parameter) implements HandledPacket<ServerPlayerEntity> {
+  ExampleServerBoundPacket(PacketByteBuf buffer) {
     this(buffer.readInt());
   }
-  
+
+  @Override
   public void toBuffer(PacketByteBuf buffer) {
     buffer.writeInt(parameter);
   }
 
+  // packets can optionally include their own handle method
+	// or you can defer handler registration to the receiver (helpful for server/client code separation)
   @Override
   public void handle(ServerPlayerEntity sender) {
     // callback executed when receiving your packet
+  }
+}
+
+record ExampleClientBoundPacket (int parameter) implements Packet<ClientPlayerEntity> {
+  ExampleClientBoundPacket(PacketByteBuf buffer) {
+    this(buffer.readInt());
+  }
+
+  @Override
+  public void toBuffer(PacketByteBuf buffer) {
+    buffer.writeInt(parameter);
   }
 }
 ```
