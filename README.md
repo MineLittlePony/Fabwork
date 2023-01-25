@@ -1,6 +1,7 @@
 Fabwork
 ========
 
+[![Current Version](https://img.shields.io/github/v/tag/MineLittlePony/Fabwork)](https://img.shields.io/github/v/tag/MineLittlePony/Fabwork)
 [![Build Status](https://github.com/Sollace/Fabwork/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/Sollace/Fabwork/actions/workflows/gradle-build.yml)
 ![License](https://img.shields.io/github/license/Sollace/Fabwork)
 ![Platform](https://img.shields.io/badge/api-fabric-orange.svg)
@@ -85,21 +86,6 @@ class ExamplePacket extends Packet<ServerPlayerEntity> {
 
 ## Maven:
 
-Since this library is still WIP and undergoing testing, there won't be a build available on the maven _yet_.
-Until that time, you can download a premade build from the releases tab on this github, create and publish your own
-for local use.
+Maven: `https://repo.minelittlepony-mod.com/maven/releases`
 
-1. `git clone https://github.com/Sollace/Fabwork.git`
-2. `cd Fabwork`
-3. `gradlew build publishToMavenLocal`
-3. Add `mavenLocal()` to your build.gradle's repositories block
-4. Add to your build.gradle's dependencies block:
-```
-    modApi "com.sollace:fabwork:${project.fabwork_version}"
-    include "com.sollace:fabwork:${project.fabwork_version}"
-```
-
-
-Maven: `https://repo.minelittlepony-mod.com/maven/snapshot`
-
-Dependency: `com.sollace:fabwork:1.1.0`
+Dependency: `com.sollace:fabwork:${project.fabwork_version}`
