@@ -39,7 +39,7 @@ fabwork.json
 ```
 {
   "requiredModIds": [
-    "fabric", ...
+    "fabric-api", ...
   ]
 }
 ```
