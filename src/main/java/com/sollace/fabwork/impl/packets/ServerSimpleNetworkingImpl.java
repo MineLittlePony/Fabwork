@@ -1,10 +1,9 @@
 package com.sollace.fabwork.impl.packets;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.function.Function;
-
-import org.apache.http.ConnectionClosedException;
 
 import com.sollace.fabwork.api.packets.*;
 import com.sollace.fabwork.impl.PlayPingSynchroniser;
@@ -33,7 +32,7 @@ public class ServerSimpleNetworkingImpl {
         Objects.requireNonNull(connection, "Client Connection cannot be null");
 
         if (!connection.isOpen()) {
-            return CompletableFuture.failedFuture(new ConnectionClosedException("Connection is closed"));
+            return CompletableFuture.failedFuture(new IOException("Connection is closed"));
         }
 
         final Object[] receivedPacket = new Object[1];
