@@ -32,18 +32,18 @@ public class FabworkServer implements ModInitializer {
         );
 
         ServerPlayNetworking.registerGlobalReceiver(CONSENT_ID, (server, player, handler, buffer, response) -> {
-            LOGGER.debug("Received synchronize response from client " + handler.getConnection().getAddress().toString());
+            LOGGER.info("Received synchronize response from client " + handler.getConnection().getAddress().toString());
             clientLoginStates.put(handler.getConnection(), new SynchronisationState(ModEntryImpl.read(buffer), emptyState.installedOnServer().stream()));
         });
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            LOGGER.debug("Sending synchronize packet to " + handler.getConnection().getAddress().toString());
+            LOGGER.info("Sending synchronize packet to " + handler.getConnection().getAddress().toString());
             sender.sendPacket(CONSENT_ID, ModEntryImpl.write(
                     emptyState.installedOnServer().stream(),
                     PacketByteBufs.create())
             );
 
             PlayPingSynchroniser.waitForClientResponse(handler.getConnection(), responseType -> {
-                LOGGER.debug("Performing verify of client's installed mods " + handler.getConnection().getAddress().toString());
+                LOGGER.info("Performing verify of client's installed mods " + handler.getConnection().getAddress().toString());
                 if (clientLoginStates.containsKey(handler.getConnection())) {
                     clientLoginStates.remove(handler.getConnection()).verify(handler.getConnection(), LOGGER, true);
                 } else {
@@ -53,6 +53,8 @@ public class FabworkServer implements ModInitializer {
             });
         });
         LoaderUtil.invokeEntryPoints("fabwork:main", ModInitializer.class, ModInitializer::onInitialize);
+
+        LOGGER.info("Loaded Fabwork " + FabricLoader.getInstance().getModContainer("fabwork").get().getMetadata().getVersion().getFriendlyString());
     }
 
     private static Stream<ModEntryImpl> makeDistinct(Stream<ModEntryImpl> entries) {
