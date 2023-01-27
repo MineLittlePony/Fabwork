@@ -32,6 +32,7 @@
   },
   "custom": {
     "modmenu": {
+      "badges": [ "library" ],
       "links": {
         "modmenu.discord": "https://discord.gg/zKSZ8Mg"
       }
