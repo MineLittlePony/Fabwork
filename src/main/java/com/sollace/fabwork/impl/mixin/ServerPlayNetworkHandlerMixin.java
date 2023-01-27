@@ -14,7 +14,7 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 
 @Mixin(ServerPlayNetworkHandler.class)
 abstract class ServerPlayNetworkHandlerMixin implements ServerPlayPacketListener {
-    @Inject(method = "onPong", at = @At("HEAD"))
+    @Inject(method = "onPong(Lnet/minecraft/network/packet/c2s/play/PlayPongC2SPacket;)V", at = @At("HEAD"))
     private void onOnPong(PlayPongC2SPacket packet, CallbackInfo info) {
         NetworkThreadUtils.forceMainThread(packet, this, ((ServerPlayNetworkHandler)(Object)this).player.getWorld());
         PlayPingSynchroniser.onClientResponse(packet, ((ServerPlayNetworkHandler)(Object)this).player.getWorld().getServer());
