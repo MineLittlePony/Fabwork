@@ -27,7 +27,7 @@ public class FabworkClientImpl implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientPlayConnectionEvents.INIT.register((handler, client) -> {
-            LOGGER.info("Client provisioned new connection " + handler.hashCode());
+            LOGGER.info("Client provisioned new connection {}", handler.hashCode());
             STATE.installedOnServer().forEach(entry -> {
                 ModProvisionCallback.EVENT.invoker().onModProvisioned(entry, false);
             });
@@ -35,16 +35,16 @@ public class FabworkClientImpl implements ClientModInitializer {
         });
         ClientPlayNetworking.registerGlobalReceiver(FabworkServer.CONSENT_ID, (client, handler, buffer, response) -> {
             STATE = new SynchronisationState(FabworkImpl.INSTANCE.getInstalledMods(), ModEntryImpl.read(buffer));
-            LOGGER.info("Responding to server sync packet " + handler.hashCode());
+            LOGGER.info("Responding to server sync packet {}", handler.hashCode());
             response.sendPacket(FabworkServer.CONSENT_ID, ModEntryImpl.write(
                     FabworkImpl.INSTANCE.getInstalledMods().filter(ModEntryImpl::requiredOnEither),
                     PacketByteBufs.create())
             );
         });
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            LOGGER.info("Entered play state. Server has 300ms to respond " + handler.hashCode());
+            LOGGER.info("Entered play state. Server has 300ms to respond {}", handler.hashCode());
             CompletableFuture.runAsync(() -> {
-                LOGGER.info("Performing verify of server's installed mods " + handler.hashCode());
+                LOGGER.info("Performing verify of server's installed mods {}", handler.hashCode());
                 STATE.verify(handler.getConnection(), LOGGER, true);
             }, WAITER);
         });

@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.Streams;
 import com.sollace.fabwork.api.Fabwork;
+import com.sollace.fabwork.impl.PlayPingSynchroniser.ResponseType;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.*;
@@ -25,7 +26,7 @@ public class FabworkServer implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        final FabworkConfig config = FabworkConfig.load(FabricLoader.getInstance().getConfigDir().resolve("fabwork.json"));
+        final FabworkConfig config = FabworkConfig.INSTANCE.get();
         final Map<ClientConnection, SynchronisationState> clientLoginStates = new HashMap<>();
         final SynchronisationState emptyState = new SynchronisationState(Stream.empty(),
                 makeDistinct(Streams.concat(FabworkImpl.INSTANCE.getInstalledMods().filter(ModEntryImpl::requiredOnEither), config.getCustomRequiredMods()))
@@ -36,19 +37,26 @@ public class FabworkServer implements ModInitializer {
             clientLoginStates.put(handler.getConnection(), new SynchronisationState(ModEntryImpl.read(buffer), emptyState.installedOnServer().stream()));
         });
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            LOGGER.info("Sending synchronize packet to " + handler.getConnection().getAddress().toString());
+            LOGGER.info("Sending synchronize packet to {}", handler.getConnection().getAddress());
             sender.sendPacket(CONSENT_ID, ModEntryImpl.write(
                     emptyState.installedOnServer().stream(),
                     PacketByteBufs.create())
             );
 
             PlayPingSynchroniser.waitForClientResponse(handler.getConnection(), responseType -> {
-                LOGGER.info("Performing verify of client's installed mods " + handler.getConnection().getAddress().toString());
-                if (clientLoginStates.containsKey(handler.getConnection())) {
-                    clientLoginStates.remove(handler.getConnection()).verify(handler.getConnection(), LOGGER, true);
+                if (responseType == ResponseType.COMPLETED) {
+                    LOGGER.info("Performing verify of client's installed mods {}", handler.getConnection().getAddress());
+                    if (clientLoginStates.containsKey(handler.getConnection())) {
+                        clientLoginStates.remove(handler.getConnection()).verify(handler.getConnection(), LOGGER, true);
+                    } else {
+                        LOGGER.warn("Client failed to respond to challenge. Assuming vanilla client {}", handler.getConnection().getAddress());
+                        emptyState.verify(handler.getConnection(), LOGGER, false);
+                    }
                 } else {
-                    LOGGER.warn("Client failed to respond to challenge. Assuming vanilla client " + handler.getConnection().getAddress().toString());
-                    emptyState.verify(handler.getConnection(), LOGGER, false);
+                    LOGGER.warn("Failed to receive response from client. {} ConnectionState: {}",
+                            handler.getConnection().getAddress(),
+                            handler.getConnection().isOpen() ? " OPEN" : " CLOSED"
+                    );
                 }
             });
         });

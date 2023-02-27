@@ -32,6 +32,11 @@ record SynchronisationState(
         if (!missingOnServer.isEmpty() || !missingOnClient.isEmpty()) {
             Text errorMessage = createErrorMessage(missingOnServer, missingOnClient, useTranslation);
             logger.error(errorMessage.getString());
+
+            if (!FabworkConfig.INSTANCE.get().enableJoinChecks) {
+                logger.info("Connection would fail with message '{}' but was allowed anyway due to configured rules.", errorMessage.toString());
+                return true;
+            }
             connection.disconnect(errorMessage);
             return false;
         }
