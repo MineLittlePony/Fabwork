@@ -38,7 +38,7 @@ class LoaderUtil {
 
     static void invokeUntrusted(Runnable task, Supplier<String> untrustedMessage) {
         try {
-
+            task.run();
         } catch (Throwable t) {
             String message = "Exception caught in unstrusted area {}";
             try {
