@@ -3,6 +3,7 @@ package com.sollace.fabwork.impl;
 import java.io.*;
 import java.nio.file.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -61,6 +62,9 @@ class FabworkConfig {
             return Stream.empty();
         }
 
-        return requiredModIds.stream().map(id -> new ModEntryImpl(id, RequirementType.CLIENT));
+        return requiredModIds.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .map(id -> new ModEntryImpl(id, RequirementType.CLIENT));
     }
 }
