@@ -17,7 +17,10 @@ class FabworkImpl implements Fabwork {
 
     @Override
     public RequirementType getRequirementForMod(String modId) {
-        return FabricLoader.getInstance().getModContainer(modId).map(FabworkImpl::getRequirementFor).orElse(RequirementType.NONE);
+        return FabricLoader.getInstance().getModContainer(modId)
+                .filter(FabworkImpl::isValid)
+                .map(FabworkImpl::getRequirementFor)
+                .orElse(RequirementType.NONE);
     }
 
     static RequirementType getRequirementFor(ModContainer mod) {
@@ -29,8 +32,12 @@ class FabworkImpl implements Fabwork {
                 .orElse(RequirementType.NONE);
     }
 
+    static boolean isValid(ModContainer mod) {
+        return mod != null && mod.getMetadata() != null && mod.getMetadata().getId() != null;
+    }
+
     @Override
     public Stream<ModEntryImpl> getInstalledMods() {
-        return FabricLoader.getInstance().getAllMods().stream().map(ModEntryImpl::new);
+        return FabricLoader.getInstance().getAllMods().stream().filter(FabworkImpl::isValid).map(ModEntryImpl::new);
     }
 }
