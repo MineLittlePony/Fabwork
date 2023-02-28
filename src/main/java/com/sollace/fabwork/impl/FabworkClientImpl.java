@@ -26,7 +26,7 @@ public class FabworkClientImpl implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        if (FabworkConfig.INSTANCE.get().enableLoginProtocol) {
+        if (!FabworkConfig.INSTANCE.get().disableLoginProtocol) {
             ClientPlayConnectionEvents.INIT.register((handler, client) -> {
                 LoaderUtil.invokeUntrusted(() -> {
                     LOGGER.info("Client provisioned new connection {}", handler.hashCode());

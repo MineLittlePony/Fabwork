@@ -32,7 +32,7 @@ public class FabworkServer implements ModInitializer {
                 makeDistinct(Streams.concat(FabworkImpl.INSTANCE.getInstalledMods().filter(ModEntryImpl::requiredOnEither), config.getCustomRequiredMods()))
         );
 
-        if (config.enableLoginProtocol) {
+        if (!config.disableLoginProtocol) {
             ServerPlayNetworking.registerGlobalReceiver(CONSENT_ID, (server, player, handler, buffer, response) -> {
                 LoaderUtil.invokeUntrusted(() -> {
                     LOGGER.info("Received synchronize response from client " + handler.getConnection().getAddress().toString());
