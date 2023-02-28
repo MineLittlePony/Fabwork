@@ -53,7 +53,8 @@ class FabworkConfig {
     @Nullable
     public List<String> requiredModIds;
 
-    public boolean enableJoinChecks;
+    public boolean doNotEnforceModMatching;
+    public boolean enableLoginProtocol;
 
     public Stream<ModEntryImpl> getCustomRequiredMods() {
         if (requiredModIds == null || requiredModIds.isEmpty()) {

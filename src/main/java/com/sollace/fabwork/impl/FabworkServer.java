@@ -32,34 +32,40 @@ public class FabworkServer implements ModInitializer {
                 makeDistinct(Streams.concat(FabworkImpl.INSTANCE.getInstalledMods().filter(ModEntryImpl::requiredOnEither), config.getCustomRequiredMods()))
         );
 
-        ServerPlayNetworking.registerGlobalReceiver(CONSENT_ID, (server, player, handler, buffer, response) -> {
-            LOGGER.info("Received synchronize response from client " + handler.getConnection().getAddress().toString());
-            clientLoginStates.put(handler.getConnection(), new SynchronisationState(ModEntryImpl.read(buffer), emptyState.installedOnServer().stream()));
-        });
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            LOGGER.info("Sending synchronize packet to {}", handler.getConnection().getAddress());
-            sender.sendPacket(CONSENT_ID, ModEntryImpl.write(
-                    emptyState.installedOnServer().stream(),
-                    PacketByteBufs.create())
-            );
-
-            PlayPingSynchroniser.waitForClientResponse(handler.getConnection(), responseType -> {
-                if (responseType == ResponseType.COMPLETED) {
-                    LOGGER.info("Performing verify of client's installed mods {}", handler.getConnection().getAddress());
-                    if (clientLoginStates.containsKey(handler.getConnection())) {
-                        clientLoginStates.remove(handler.getConnection()).verify(handler.getConnection(), LOGGER, true);
-                    } else {
-                        LOGGER.warn("Client failed to respond to challenge. Assuming vanilla client {}", handler.getConnection().getAddress());
-                        emptyState.verify(handler.getConnection(), LOGGER, false);
-                    }
-                } else {
-                    LOGGER.warn("Failed to receive response from client. {} ConnectionState: {}",
-                            handler.getConnection().getAddress(),
-                            handler.getConnection().isOpen() ? " OPEN" : " CLOSED"
-                    );
-                }
+        if (config.enableLoginProtocol) {
+            ServerPlayNetworking.registerGlobalReceiver(CONSENT_ID, (server, player, handler, buffer, response) -> {
+                LoaderUtil.invokeUntrusted(() -> {
+                    LOGGER.info("Received synchronize response from client " + handler.getConnection().getAddress().toString());
+                    clientLoginStates.put(handler.getConnection(), new SynchronisationState(ModEntryImpl.read(buffer), emptyState.installedOnServer().stream()));
+                }, "Received synchronize response from client");
             });
-        });
+            ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+                LoaderUtil.invokeUntrusted(() -> {
+                    LOGGER.info("Sending synchronize packet to {}", handler.getConnection().getAddress());
+                    sender.sendPacket(CONSENT_ID, ModEntryImpl.write(
+                            emptyState.installedOnServer().stream(),
+                            PacketByteBufs.create())
+                    );
+
+                    PlayPingSynchroniser.waitForClientResponse(handler.getConnection(), responseType -> {
+                        if (responseType == ResponseType.COMPLETED) {
+                            LOGGER.info("Performing verify of client's installed mods {}", handler.getConnection().getAddress());
+                            if (clientLoginStates.containsKey(handler.getConnection())) {
+                                clientLoginStates.remove(handler.getConnection()).verify(handler.getConnection(), LOGGER, true);
+                            } else {
+                                LOGGER.warn("Client failed to respond to challenge. Assuming vanilla client {}", handler.getConnection().getAddress());
+                                emptyState.verify(handler.getConnection(), LOGGER, false);
+                            }
+                        } else {
+                            LOGGER.warn("Failed to receive response from client. {} ConnectionState: {}",
+                                    handler.getConnection().getAddress(),
+                                    handler.getConnection().isOpen() ? " OPEN" : " CLOSED"
+                            );
+                        }
+                    });
+                }, "Sending synchronize packet");
+            });
+        }
         LoaderUtil.invokeEntryPoints("fabwork:main", ModInitializer.class, ModInitializer::onInitialize);
 
         LOGGER.info("Loaded Fabwork " + FabricLoader.getInstance().getModContainer("fabwork").get().getMetadata().getVersion().getFriendlyString());

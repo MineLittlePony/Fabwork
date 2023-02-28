@@ -2,6 +2,7 @@ package com.sollace.fabwork.impl;
 
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -16,11 +17,9 @@ class LoaderUtil {
     static <EntryPoint> void invokeEntryPoints(String key, Class<EntryPoint> clazz, Consumer<EntryPoint> invokation) {
         try {
             FabricLoader.getInstance().getEntrypointContainers(key, clazz).forEach(initializer -> {
-                try {
+                invokeUntrusted(() -> {
                     invokation.accept(initializer.getEntrypoint());
-                } catch (Throwable t) {
-                    LOGGER.fatal("Exception occured whilst invoking initializer for {} provided by {}", key, initializer.getProvider().getMetadata().getId());
-                }
+                }, () -> "Exception occured whilst invoking initializer for " + key + " provided by " + initializer.getProvider().getMetadata().getId() + " {}");
             });
         } catch (Throwable t) {
             LOGGER.fatal("Could not get entrypoints for {}.", key);
@@ -35,5 +34,23 @@ class LoaderUtil {
                 .collect(Collectors.toSet());
         invokeEntryPoints(baseKey, ClientModInitializer.class, ClientModInitializer::onInitializeClient);
         modIds.forEach(id -> invokeEntryPoints(baseKey + ":" + id, clazz, invokation));
+    }
+
+    static void invokeUntrusted(Runnable task, Supplier<String> untrustedMessage) {
+        try {
+
+        } catch (Throwable t) {
+            String message = "Exception caught in unstrusted area {}";
+            try {
+                message = untrustedMessage.get();
+            } catch (Throwable t2) {
+                t.addSuppressed(t);
+            }
+            LOGGER.fatal(message, t);
+        }
+    }
+
+    static void invokeUntrusted(Runnable task, String message) {
+        invokeUntrusted(task, () -> message + " {}");
     }
 }

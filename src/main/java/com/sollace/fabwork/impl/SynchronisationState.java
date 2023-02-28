@@ -33,7 +33,7 @@ record SynchronisationState(
             Text errorMessage = createErrorMessage(missingOnServer, missingOnClient, useTranslation);
             logger.error(errorMessage.getString());
 
-            if (!FabworkConfig.INSTANCE.get().enableJoinChecks) {
+            if (FabworkConfig.INSTANCE.get().doNotEnforceModMatching) {
                 logger.info("Connection would fail with message '{}' but was allowed anyway due to configured rules.", errorMessage.toString());
                 return true;
             }
