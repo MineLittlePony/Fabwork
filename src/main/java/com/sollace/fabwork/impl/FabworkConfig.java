@@ -56,6 +56,7 @@ class FabworkConfig {
 
     public boolean doNotEnforceModMatching;
     public boolean disableLoginProtocol;
+    public boolean allowUnmoddedClients;
 
     public Stream<ModEntryImpl> getCustomRequiredMods() {
         if (requiredModIds == null || requiredModIds.isEmpty()) {

@@ -2,7 +2,6 @@ package com.sollace.fabwork.impl;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Logger;
@@ -22,8 +21,8 @@ record SynchronisationState(
     }
 
     public boolean verify(ClientConnection connection, Logger logger, boolean useTranslation) {
-        Set<String> missingOnServer = getDifference(installedOnClient.stream().filter(c -> c.requirement().isRequiredOnServer()), installedOnServer);
-        Set<String> missingOnClient = getDifference(installedOnServer.stream().filter(c -> c.requirement().isRequiredOnClient()), installedOnClient);
+        Set<String> missingOnServer = ModEntriesUtil.compare(installedOnClient.stream().filter(c -> c.requirement().isRequiredOnServer()), installedOnServer);
+        Set<String> missingOnClient = ModEntriesUtil.compare(installedOnServer.stream().filter(c -> c.requirement().isRequiredOnClient()), installedOnClient);
 
         installedOnServer.stream().forEach(entry -> {
             ModProvisionCallback.EVENT.invoker().onModProvisioned(entry, !missingOnClient.contains(entry.modId()));
@@ -45,14 +44,6 @@ record SynchronisationState(
 
         logger.info("Connection succeeded with {} syncronised mod(s) [{}]", installed.length, String.join(", ", installed));
         return true;
-    }
-
-    private Set<String> getDifference(Stream<ModEntryImpl> provided, List<ModEntryImpl> required) {
-        return provided
-                .map(ModEntry::modId)
-                .filter(id -> required.stream().filter(cc -> cc.modId().equalsIgnoreCase(id)).findAny().isEmpty())
-                .distinct()
-                .collect(Collectors.toSet());
     }
 
     private Text createErrorMessage(Set<String> missingOnServer, Set<String> missingOnClient, boolean useTranslation) {

@@ -5,9 +5,11 @@
   "refmap": "fabwork.mixin.refmap.json",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ServerPlayNetworkHandlerMixin"
+    "ServerPlayNetworkHandlerMixin",
+    "PlayerManagerMixin"
   ],
   "client": [
+    "client.ClientPlayNetworkHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
