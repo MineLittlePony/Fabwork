@@ -28,7 +28,7 @@ public final class ClientSimpleNetworkingImpl {
         ClientPlayNetworking.send(id, buffer);
     }
 
-    public static net.minecraft.network.Packet<ServerPlayPacketListener> createC2SPacket(Identifier id, PacketByteBuf buffer) {
+    public static net.minecraft.network.packet.Packet<ServerPlayPacketListener> createC2SPacket(Identifier id, PacketByteBuf buffer) {
         return ClientPlayNetworking.createC2SPacket(id, buffer);
     }
 }

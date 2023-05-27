@@ -5,6 +5,7 @@ import java.util.concurrent.*;
 import java.util.function.Function;
 
 import com.google.common.base.Preconditions;
+import com.sollace.fabwork.impl.ClientConnectionAccessor;
 import com.sollace.fabwork.impl.packets.ClientSimpleNetworkingImpl;
 import com.sollace.fabwork.impl.packets.ServerSimpleNetworkingImpl;
 
@@ -50,13 +51,13 @@ public record C2SPacketType<T extends Packet<ServerPlayerEntity>> (
      */
     public Future<T> awaitResponseFrom(ServerPlayerEntity client) {
         Objects.requireNonNull(client, "Client player cannot be null");
-        return ServerSimpleNetworkingImpl.waitForReponse(this, client.networkHandler.getConnection());
+        return ServerSimpleNetworkingImpl.waitForReponse(this, ClientConnectionAccessor.get(client.networkHandler));
     }
 
     /**
      * Repackages a Fabwork packet into a normal Minecraft protocol packet suitable for sending to the connected server.
      */
-    public net.minecraft.network.Packet<ServerPlayPacketListener> toPacket(T packet) {
+    public net.minecraft.network.packet.Packet<ServerPlayPacketListener> toPacket(T packet) {
         Objects.requireNonNull(packet, "Packet cannot be null");
         return ClientSimpleNetworkingImpl.createC2SPacket(id(), packet.toBuffer());
     }

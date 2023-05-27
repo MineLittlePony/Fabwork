@@ -6,6 +6,7 @@ import java.util.concurrent.*;
 import java.util.function.Function;
 
 import com.sollace.fabwork.api.packets.*;
+import com.sollace.fabwork.impl.ClientConnectionAccessor;
 import com.sollace.fabwork.impl.PlayPingSynchroniser;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -39,7 +40,7 @@ public class ServerSimpleNetworkingImpl {
         final CompletableFuture<T> future = new CompletableFuture<>();
 
         packetType.receiver().addTemporaryListener((sender, packet) -> {
-            if (sender.networkHandler.getConnection() == connection) {
+            if (ClientConnectionAccessor.get(sender.networkHandler) == connection) {
                 receivedPacket[0] = packet;
                 return true;
             }

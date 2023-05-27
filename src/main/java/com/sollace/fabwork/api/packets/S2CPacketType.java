@@ -46,7 +46,7 @@ public record S2CPacketType<T extends Packet<? extends PlayerEntity>> (
     /**
      * Repackages a fabwork packet into a normal Minecraft protocol packet suitable for sending to a connected client.
      */
-    public net.minecraft.network.Packet<ClientPlayPacketListener> toPacket(T packet) {
+    public net.minecraft.network.packet.Packet<ClientPlayPacketListener> toPacket(T packet) {
         Objects.requireNonNull(packet, "Packet cannot be null");
         return ServerPlayNetworking.createS2CPacket(id(), packet.toBuffer());
     }
