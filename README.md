@@ -1,7 +1,7 @@
 Fabwork
 ========
 
-[![Current Version](https://img.shields.io/github/v/tag/MineLittlePony/Fabwork)](https://img.shields.io/github/v/tag/MineLittlePony/Fabwork)
+[![Current Version](https://img.shields.io/github/v/release/MineLittlePony/Fabwork)](https://github.com/MineLittlePony/Fabwork/releases/latest)
 [![Build Status](https://github.com/Sollace/Fabwork/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/Sollace/Fabwork/actions/workflows/gradle-build.yml)
 ![License](https://img.shields.io/github/license/Sollace/Fabwork)
 ![Platform](https://img.shields.io/badge/api-fabric-orange.svg)
