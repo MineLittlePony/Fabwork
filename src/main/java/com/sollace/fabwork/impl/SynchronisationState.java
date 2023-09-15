@@ -1,6 +1,7 @@
 package com.sollace.fabwork.impl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -9,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 import com.sollace.fabwork.api.ModEntry;
 import com.sollace.fabwork.api.client.ModProvisionCallback;
 
-import net.minecraft.network.ClientConnection;
 import net.minecraft.text.Text;
 
 record SynchronisationState(
@@ -20,7 +20,7 @@ record SynchronisationState(
         this(installedOnClient.toList(), installedOnServer.toList());
     }
 
-    public boolean verify(ClientConnection connection, Logger logger, boolean useTranslation) {
+    public Optional<Text> verify(Logger logger, boolean useTranslation) {
         Set<String> missingOnServer = ModEntriesUtil.compare(installedOnClient.stream().filter(c -> c.requirement().isRequiredOnServer()), installedOnServer);
         Set<String> missingOnClient = ModEntriesUtil.compare(installedOnServer.stream().filter(c -> c.requirement().isRequiredOnClient()), installedOnClient);
 
@@ -34,16 +34,16 @@ record SynchronisationState(
 
             if (FabworkConfig.INSTANCE.get().doNotEnforceModMatching) {
                 logger.info("Connection would fail with message '{}' but was allowed anyway due to configured rules.", errorMessage.toString());
-                return true;
+                return Optional.empty();
             }
-            connection.disconnect(errorMessage);
-            return false;
+
+            return Optional.of(errorMessage);
         }
 
         String[] installed = installedOnServer.stream().map(ModEntry::modId).toArray(String[]::new);
 
         logger.info("Connection succeeded with {} syncronised mod(s) [{}]", installed.length, String.join(", ", installed));
-        return true;
+        return Optional.empty();
     }
 
     private Text createErrorMessage(Set<String> missingOnServer, Set<String> missingOnClient, boolean useTranslation) {

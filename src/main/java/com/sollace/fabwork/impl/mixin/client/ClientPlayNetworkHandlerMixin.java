@@ -12,6 +12,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.packet.s2c.play.SynchronizeRecipesS2CPacket;
 
+@Deprecated
 @Mixin(value = ClientPlayNetworkHandler.class, priority = 999)
 abstract class ClientPlayNetworkHandlerMixin {
     @Inject(method = "onSynchronizeRecipes", at = @At("RETURN"))

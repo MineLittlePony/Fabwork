@@ -12,7 +12,7 @@ import com.sollace.fabwork.impl.packets.ServerSimpleNetworkingImpl;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.listener.ServerPlayPacketListener;
+import net.minecraft.network.listener.ServerCommonPacketListener;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
@@ -24,7 +24,7 @@ import net.minecraft.util.Identifier;
  * <p>
  * Responses can be sent back to the sending player by calling the appropriate send method on a S2CPacketType.
  */
-public record C2SPacketType<T extends Packet<ServerPlayerEntity>> (
+public record C2SPacketType<T extends Packet> (
         Identifier id,
         Function<PacketByteBuf, T> constructor,
         Receiver<ServerPlayerEntity, T> receiver
@@ -54,10 +54,10 @@ public record C2SPacketType<T extends Packet<ServerPlayerEntity>> (
         return ServerSimpleNetworkingImpl.waitForReponse(this, ClientConnectionAccessor.get(client.networkHandler));
     }
 
-    /**
+    /**s
      * Repackages a Fabwork packet into a normal Minecraft protocol packet suitable for sending to the connected server.
      */
-    public net.minecraft.network.packet.Packet<ServerPlayPacketListener> toPacket(T packet) {
+    public net.minecraft.network.packet.Packet<ServerCommonPacketListener> toPacket(T packet) {
         Objects.requireNonNull(packet, "Packet cannot be null");
         return ClientSimpleNetworkingImpl.createC2SPacket(id(), packet.toBuffer());
     }

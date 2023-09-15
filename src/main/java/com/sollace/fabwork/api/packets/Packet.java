@@ -1,7 +1,6 @@
 package com.sollace.fabwork.api.packets;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 
 /**
@@ -13,7 +12,7 @@ import net.minecraft.network.PacketByteBuf;
  *
  * @author Sollace
  */
-public interface Packet<P extends PlayerEntity> {
+public interface Packet {
     /**
      * Writes this packet to the supplied buffer prior to transmission.
      *

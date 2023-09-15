@@ -5,7 +5,7 @@
   "refmap": "fabwork.mixin.refmap.json",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ServerPlayNetworkHandlerMixin",
+    "ServerCommonNetworkHandlerMixin",
     "PlayerManagerMixin"
   ],
   "client": [

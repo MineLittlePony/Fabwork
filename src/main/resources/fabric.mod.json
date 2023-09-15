@@ -24,9 +24,10 @@
     "fabwork.mixin.json"
   ],
   "depends": {
-    "fabricloader": ">=0.12.0",
+    "minecraft": "${minecraftVersion}",
+    "fabricloader": "${loaderVersion}",
     "java": ">=17",
-    "fabric": "*"
+    "fabric-api": "${fabricVersion}"
   },
   "suggests": {
   },

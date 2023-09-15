@@ -9,10 +9,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.sollace.fabwork.api.packets.*;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 
-final class ReceiverImpl<P extends PlayerEntity, T extends Packet<P>> implements Receiver<P, T> {
+final class ReceiverImpl<Sender, P extends Packet> implements Receiver<Sender, P> {
     private static final Logger LOGGER = LogManager.getLogger();
     private final ListenerList persistentListeners = new ListenerList();
     private final ListenerList listeners = new ListenerList();
@@ -24,7 +23,7 @@ final class ReceiverImpl<P extends PlayerEntity, T extends Packet<P>> implements
     }
 
     @Override
-    public void addPersistentListener(BiConsumer<P, T> callback) {
+    public void addPersistentListener(BiConsumer<Sender, P> callback) {
         persistentListeners.enqueue((p, t) -> {
             callback.accept(p, t);
             return false;
@@ -32,17 +31,17 @@ final class ReceiverImpl<P extends PlayerEntity, T extends Packet<P>> implements
     }
 
     @Override
-    public void addTemporaryListener(BiPredicate<P, T> callback) {
+    public void addTemporaryListener(BiPredicate<Sender, P> callback) {
         listeners.enqueue(callback);
     }
 
     @SuppressWarnings("unchecked")
-    void onReceive(P sender, T packet) {
+    void onReceive(Sender sender, P packet) {
         persistentListeners.fire(sender, packet);
         listeners.fire(sender, packet);
         if (packet instanceof HandledPacket) {
             try {
-                ((HandledPacket<P>)packet).handle(sender);
+                ((HandledPacket<Sender>)packet).handle(sender);
             } catch (Exception e) {
                 LOGGER.error("Exception whilst handling packet callback for handled packet " + id, e);
             }
@@ -50,16 +49,16 @@ final class ReceiverImpl<P extends PlayerEntity, T extends Packet<P>> implements
     }
 
     final class ListenerList {
-        private final List<BiPredicate<P, T>> listeners = new ArrayList<>();
+        private final List<BiPredicate<Sender, P>> listeners = new ArrayList<>();
 
-        void enqueue(BiPredicate<P, T> listener) {
+        void enqueue(BiPredicate<Sender, P> listener) {
             synchronized (this) {
                 listeners.add(listener);
             }
         }
 
-        void fire(P sender, T packet) {
-            final List<BiPredicate<P, T>> handlers;
+        void fire(Sender sender, P packet) {
+            final List<BiPredicate<Sender, P>> handlers;
             synchronized (this) {
                 handlers = new ArrayList<>(listeners);
                 listeners.clear();

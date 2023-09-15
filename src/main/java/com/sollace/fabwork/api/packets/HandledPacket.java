@@ -1,7 +1,5 @@
 package com.sollace.fabwork.api.packets;
 
-import net.minecraft.entity.player.PlayerEntity;
-
 /**
  * A special sub-class of a packet that provides its own handler.
  * <p>
@@ -19,7 +17,7 @@ import net.minecraft.entity.player.PlayerEntity;
  *
  * @author Sollace
  */
-public interface HandledPacket<P extends PlayerEntity> extends Packet<P> {
+public interface HandledPacket<Sender> extends Packet {
     /**
      * Called to handle this packet on the receiving end.
      * <p>
@@ -30,5 +28,5 @@ public interface HandledPacket<P extends PlayerEntity> extends Packet<P> {
      *
      * @param sender The player who initially sent this packet.
      */
-    void handle(P sender);
+    void handle(Sender sender);
 }

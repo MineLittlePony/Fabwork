@@ -18,7 +18,7 @@ import net.minecraft.util.Identifier;
 public class ServerSimpleNetworkingImpl {
     private ServerSimpleNetworkingImpl() { throw new RuntimeException("new ServerSimpleNetworkingImpl()"); }
 
-    public static <T extends Packet<ServerPlayerEntity>> C2SPacketType<T> register(Identifier id, Function<PacketByteBuf, T> factory) {
+    public static <T extends Packet> C2SPacketType<T> register(Identifier id, Function<PacketByteBuf, T> factory) {
         ReceiverImpl<ServerPlayerEntity, T> receiver = new ReceiverImpl<>(id);
         C2SPacketType<T> type = new C2SPacketType<>(id, factory, receiver);
         ServerPlayNetworking.registerGlobalReceiver(type.id(), (server, player, handler, buffer, responder) -> {
@@ -29,7 +29,7 @@ public class ServerSimpleNetworkingImpl {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Packet<ServerPlayerEntity>> Future<T> waitForReponse(C2SPacketType<T> packetType, ClientConnection connection) {
+    public static <T extends Packet> Future<T> waitForReponse(C2SPacketType<T> packetType, ClientConnection connection) {
         Objects.requireNonNull(connection, "Client Connection cannot be null");
 
         if (!connection.isOpen()) {

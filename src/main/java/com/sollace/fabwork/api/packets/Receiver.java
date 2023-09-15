@@ -3,8 +3,6 @@ package com.sollace.fabwork.api.packets;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
-import net.minecraft.entity.player.PlayerEntity;
-
 /**
  * A receiver for subscribing to packet responses beyond just the initial global method.
  * <p>
@@ -12,10 +10,10 @@ import net.minecraft.entity.player.PlayerEntity;
  * an event bus to subscribe to responses, or expose it for use by others without
  * them having to register any additional receivers.
  *
- * @param <P> The sending player
- * @param <T> The packet type received.
+ * @param <Sender> The sending player
+ * @param <P> The packet type received.
  */
-public interface Receiver<P extends PlayerEntity, T extends Packet<P>> {
+public interface Receiver<Sender, P extends Packet> {
     /**
      * Adds a persistent listener.
      * Once registered, these listeners will remain registered for the lifetime of the client or until they throw an exception.
@@ -31,7 +29,7 @@ public interface Receiver<P extends PlayerEntity, T extends Packet<P>> {
      *
      * @param callback The callback to execute upon receipt of a packet from this receiver.
      */
-    void addPersistentListener(BiConsumer<P, T> callback);
+    void addPersistentListener(BiConsumer<Sender, P> callback);
 
     /**
      * Adds a temporary listener.
@@ -39,5 +37,5 @@ public interface Receiver<P extends PlayerEntity, T extends Packet<P>> {
      *
      * @param callback The callback to execute upon receipt of a packet from this receiver.
      */
-    void addTemporaryListener(BiPredicate<P, T> callback);
+    void addTemporaryListener(BiPredicate<Sender, P> callback);
 }

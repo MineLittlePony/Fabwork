@@ -1,6 +1,7 @@
 package com.sollace.fabwork.api;
 
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * An installation requirement used to indicate in which environments a mod needs to be available
@@ -48,15 +49,11 @@ public enum RequirementType {
     }
 
     public static RequirementType forKey(String key) {
-        if (key == null) {
-            return NONE;
-        }
-        key = key.toLowerCase(Locale.ROOT).trim();
-        switch (key) {
-            case "*": return BOTH;
-            case "client": return CLIENT;
-            case "server": return SERVER;
-            default: return NONE;
-        }
+        return switch (Objects.requireNonNullElse(key, "").toLowerCase(Locale.ROOT).trim()) {
+                case "*" -> BOTH;
+                case "client" -> CLIENT;
+                case "server" -> SERVER;
+                default -> NONE;
+        };
     }
 }

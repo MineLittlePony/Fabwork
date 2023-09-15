@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.listener.ClientCommonPacketListener;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 /**
  * A client packet type. Sent by the server to a specific player.
  */
-public record S2CPacketType<T extends Packet<? extends PlayerEntity>> (
+public record S2CPacketType<T extends Packet> (
         Identifier id,
         Function<PacketByteBuf, T> constructor,
         Receiver<? extends PlayerEntity, T> receiver
@@ -46,7 +46,7 @@ public record S2CPacketType<T extends Packet<? extends PlayerEntity>> (
     /**
      * Repackages a fabwork packet into a normal Minecraft protocol packet suitable for sending to a connected client.
      */
-    public net.minecraft.network.packet.Packet<ClientPlayPacketListener> toPacket(T packet) {
+    public net.minecraft.network.packet.Packet<ClientCommonPacketListener> toPacket(T packet) {
         Objects.requireNonNull(packet, "Packet cannot be null");
         return ServerPlayNetworking.createS2CPacket(id(), packet.toBuffer());
     }
