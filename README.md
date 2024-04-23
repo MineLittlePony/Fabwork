@@ -93,7 +93,7 @@ record ExampleServerBoundPacket (int parameter) implements HandledPacket<ServerP
   }
 }
 
-record ExampleClientBoundPacket (int parameter) implements Packet<ClientPlayerEntity> {
+record ExampleClientBoundPacket (int parameter) implements Packet {
   ExampleClientBoundPacket(PacketByteBuf buffer) {
     this(buffer.readInt());
   }
