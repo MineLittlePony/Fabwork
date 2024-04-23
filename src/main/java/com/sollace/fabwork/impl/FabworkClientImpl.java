@@ -12,7 +12,6 @@ import com.sollace.fabwork.api.client.FabworkClient;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.*;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 
@@ -39,15 +38,14 @@ public class FabworkClientImpl implements ClientModInitializer {
                     STATE = EMPTY_STATE;
                 }, "Client connection init");
             });
-            ClientConfigurationNetworking.registerGlobalReceiver(FabworkServer.CONSENT_ID, (client, handler, buffer, response) -> {
+            ClientConfigurationNetworking.registerGlobalReceiver(ConsentMessage.ID, (payload, context) -> {
                 LoaderUtil.invokeUntrusted(() -> {
-                    STATE = new SynchronisationState(FabworkImpl.INSTANCE.getInstalledMods(), ModEntryImpl.read(buffer));
+                    STATE = new SynchronisationState(FabworkImpl.INSTANCE.getInstalledMods(), payload.entries().stream());
                     LOGGER.info("Got mod list from server: {}", ModEntriesUtil.stringify(STATE.installedOnServer()));
                     Set<String> serverModIds = STATE.installedOnServer().stream().map(ModEntryImpl::modId).distinct().collect(Collectors.toSet());
-                    response.sendPacket(FabworkServer.CONSENT_ID, ModEntryImpl.write(
-                            FabworkImpl.INSTANCE.getInstalledMods().filter(entry -> entry.requiredOnEither() || serverModIds.contains(entry.modId())),
-                            PacketByteBufs.create())
-                    );
+                    context.responseSender().sendPacket(new ConsentMessage(
+                            FabworkImpl.INSTANCE.getInstalledMods().filter(entry -> entry.requiredOnEither() || serverModIds.contains(entry.modId())).toList()
+                    ));
                 }, "Responding to server sync packet");
             });
 

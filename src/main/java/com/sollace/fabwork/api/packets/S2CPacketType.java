@@ -1,29 +1,28 @@
 package com.sollace.fabwork.api.packets;
 
 import java.util.Objects;
-import java.util.function.Function;
-
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.listener.ClientCommonPacketListener;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
 /**
  * A client packet type. Sent by the server to a specific player.
  */
 public record S2CPacketType<T extends Packet> (
-        Identifier id,
-        Function<PacketByteBuf, T> constructor,
+        CustomPayload.Id<Payload<T>> id,
+        PacketCodec<PacketByteBuf, Payload<T>> codec,
         Receiver<? extends PlayerEntity, T> receiver
     ) {
     public void sendToPlayer(T packet, ServerPlayerEntity recipient) {
         Objects.requireNonNull(packet, "Packet cannot be null");
-        ServerPlayNetworking.send(recipient, id(), packet.toBuffer());
+        ServerPlayNetworking.send(recipient, new Payload<>(packet, id));
     }
 
     public void sendToAllPlayers(T packet, World world) {
@@ -48,6 +47,6 @@ public record S2CPacketType<T extends Packet> (
      */
     public net.minecraft.network.packet.Packet<ClientCommonPacketListener> toPacket(T packet) {
         Objects.requireNonNull(packet, "Packet cannot be null");
-        return ServerPlayNetworking.createS2CPacket(id(), packet.toBuffer());
+        return ServerPlayNetworking.createS2CPacket(new Payload<>(packet, id));
     }
 }

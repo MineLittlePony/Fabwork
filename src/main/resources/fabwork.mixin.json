@@ -3,13 +3,9 @@
   "minVersion": "0.7",
   "package": "com.sollace.fabwork.impl.mixin",
   "refmap": "fabwork.mixin.refmap.json",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ServerCommonNetworkHandlerMixin",
-    "PlayerManagerMixin"
-  ],
-  "client": [
-    "client.ClientPlayNetworkHandlerMixin"
+    "ServerCommonNetworkHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

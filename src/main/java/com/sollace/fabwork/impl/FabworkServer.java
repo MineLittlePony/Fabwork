@@ -16,12 +16,10 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.server.network.ServerPlayerConfigurationTask;
-import net.minecraft.util.Identifier;
 
 public class FabworkServer implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("Fabwork::SERVER");
-    public static final Identifier CONSENT_ID = id("synchronize");
-    public static final ServerPlayerConfigurationTask.Key MOD_LIST_SYNC_TASK = new ServerPlayerConfigurationTask.Key(CONSENT_ID.toString());
+    public static final ServerPlayerConfigurationTask.Key MOD_LIST_SYNC_TASK = new ServerPlayerConfigurationTask.Key(ConsentMessage.ID.id().toString());
     public static final int PROTOCOL_VERSION = 1;
 
     public static final Fabwork FABWORK = FabworkImpl.INSTANCE;
@@ -41,15 +39,12 @@ public class FabworkServer implements ModInitializer {
             ServerConfigurationConnectionEvents.CONFIGURE.register((handler, server) -> {
                 ClientConnection connection = ClientConnectionAccessor.get(handler);
 
-                if (ServerConfigurationNetworking.canSend(handler, CONSENT_ID)) {
+                if (ServerConfigurationNetworking.canSend(handler, ConsentMessage.ID)) {
                     handler.addTask(new ServerPlayerConfigurationTask() {
                         @Override
                         public void sendPacket(Consumer<Packet<?>> sender) {
                             LOGGER.info("Sending mod list to {}[{}]", handler.getDebugProfile().getName(), connection.getAddress());
-                            sender.accept(ServerConfigurationNetworking.createS2CPacket(CONSENT_ID, ModEntryImpl.write(
-                                    emptyState.installedOnServer().stream(),
-                                    PacketByteBufs.create())
-                            ));
+                            sender.accept(ServerConfigurationNetworking.createS2CPacket(new ConsentMessage(emptyState.installedOnServer())));
                         }
 
                         @Override
@@ -67,12 +62,12 @@ public class FabworkServer implements ModInitializer {
                 }
             });
 
-            ServerConfigurationNetworking.registerGlobalReceiver(CONSENT_ID, (server, handler, buffer, response) -> {
+            ServerConfigurationNetworking.registerGlobalReceiver(ConsentMessage.ID, (payload, context) -> {
                 LoaderUtil.invokeUntrusted(() -> {
-                    SynchronisationState state = new SynchronisationState(ModEntryImpl.read(buffer), emptyState.installedOnServer().stream());
-                    ClientConnection connection = ClientConnectionAccessor.get(handler);
-                    LOGGER.info("Got mod list from {}[{}]: {}", handler.getDebugProfile().getName(), connection.getAddress(), ModEntriesUtil.stringify(state.installedOnClient()));
-                    state.verify(LOGGER, true).ifPresentOrElse(handler::disconnect, () -> handler.completeTask(MOD_LIST_SYNC_TASK));
+                    SynchronisationState state = new SynchronisationState(payload.entries().stream(), emptyState.installedOnServer().stream());
+                    ClientConnection connection = ClientConnectionAccessor.get(context.networkHandler());
+                    LOGGER.info("Got mod list from {}[{}]: {}", context.networkHandler().getDebugProfile().getName(), connection.getAddress(), ModEntriesUtil.stringify(state.installedOnClient()));
+                    state.verify(LOGGER, true).ifPresentOrElse(context.networkHandler()::disconnect, () -> context.networkHandler().completeTask(MOD_LIST_SYNC_TASK));
                 }, "Received synchronize response from client");
             });
         }
@@ -87,9 +82,5 @@ public class FabworkServer implements ModInitializer {
             map.compute(entry.modId(), (id, value) -> value == null || entry.requirement().supercedes(value.requirement()) ? entry : value);
         });
         return map.values().stream();
-    }
-
-    private static Identifier id(String name) {
-        return new Identifier("fabwork", name);
     }
 }

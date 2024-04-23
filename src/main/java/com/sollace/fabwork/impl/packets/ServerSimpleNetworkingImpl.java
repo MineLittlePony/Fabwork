@@ -9,9 +9,12 @@ import com.sollace.fabwork.api.packets.*;
 import com.sollace.fabwork.impl.ClientConnectionAccessor;
 import com.sollace.fabwork.impl.PlayPingSynchroniser;
 
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
@@ -19,11 +22,11 @@ public class ServerSimpleNetworkingImpl {
     private ServerSimpleNetworkingImpl() { throw new RuntimeException("new ServerSimpleNetworkingImpl()"); }
 
     public static <T extends Packet> C2SPacketType<T> register(Identifier id, Function<PacketByteBuf, T> factory) {
-        ReceiverImpl<ServerPlayerEntity, T> receiver = new ReceiverImpl<>(id);
-        C2SPacketType<T> type = new C2SPacketType<>(id, factory, receiver);
-        ServerPlayNetworking.registerGlobalReceiver(type.id(), (server, player, handler, buffer, responder) -> {
-            T packet = type.constructor().apply(buffer);
-            server.execute(() -> receiver.onReceive(player, packet));
+        var packetId = new CustomPayload.Id<Payload<T>>(id);
+        var type = new C2SPacketType<>(packetId, Payload.createCodec(packetId, PacketCodec.of(Packet::toBuffer, factory::apply)), new ReceiverImpl<>(id));
+        PayloadTypeRegistry.playC2S().register(type.id(), type.codec());
+        ServerPlayNetworking.registerGlobalReceiver(type.id(), (payload, context) -> {
+            context.player().server.execute(() -> ((ReceiverImpl<ServerPlayerEntity, T>)type.receiver()).onReceive(context.player(), payload.packet()));
         });
         return type;
     }

@@ -2,8 +2,6 @@ package com.sollace.fabwork.api.packets;
 
 import java.util.Objects;
 import java.util.concurrent.*;
-import java.util.function.Function;
-
 import com.google.common.base.Preconditions;
 import com.sollace.fabwork.impl.ClientConnectionAccessor;
 import com.sollace.fabwork.impl.packets.ClientSimpleNetworkingImpl;
@@ -12,12 +10,13 @@ import com.sollace.fabwork.impl.packets.ServerSimpleNetworkingImpl;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.listener.ServerCommonPacketListener;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
 
 /**
- * A server-beound packet type. Sent by the client to the server.
+ * A server-bound packet type. Sent by the client to the server.
  * <p>
  * The handler for packets registered with this type are executed on the server's main thread
  * and receive the originating ServerPlayerEntity.
@@ -25,8 +24,8 @@ import net.minecraft.util.Identifier;
  * Responses can be sent back to the sending player by calling the appropriate send method on a S2CPacketType.
  */
 public record C2SPacketType<T extends Packet> (
-        Identifier id,
-        Function<PacketByteBuf, T> constructor,
+        CustomPayload.Id<Payload<T>> id,
+        PacketCodec<PacketByteBuf, Payload<T>> codec,
         Receiver<ServerPlayerEntity, T> receiver
     ) {
     /**
@@ -36,7 +35,7 @@ public record C2SPacketType<T extends Packet> (
      */
     public void sendToServer(T packet) {
         Preconditions.checkState(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT, "Client packet send called by the server");
-        ClientSimpleNetworkingImpl.send(id(), packet.toBuffer());
+        ClientSimpleNetworkingImpl.send(new Payload<>(packet, id));
     }
 
     /**
@@ -54,11 +53,11 @@ public record C2SPacketType<T extends Packet> (
         return ServerSimpleNetworkingImpl.waitForReponse(this, ClientConnectionAccessor.get(client.networkHandler));
     }
 
-    /**s
+    /**
      * Repackages a Fabwork packet into a normal Minecraft protocol packet suitable for sending to the connected server.
      */
     public net.minecraft.network.packet.Packet<ServerCommonPacketListener> toPacket(T packet) {
         Objects.requireNonNull(packet, "Packet cannot be null");
-        return ClientSimpleNetworkingImpl.createC2SPacket(id(), packet.toBuffer());
+        return ClientSimpleNetworkingImpl.createC2SPacket(new Payload<>(packet, id));
     }
 }
