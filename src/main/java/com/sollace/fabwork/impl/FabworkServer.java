@@ -62,6 +62,7 @@ public class FabworkServer implements ModInitializer {
                 }
             });
 
+            PayloadTypeRegistry.configurationC2S().register(ConsentMessage.ID, ConsentMessage.CODEC);
             ServerConfigurationNetworking.registerGlobalReceiver(ConsentMessage.ID, (payload, context) -> {
                 LoaderUtil.invokeUntrusted(() -> {
                     SynchronisationState state = new SynchronisationState(payload.entries().stream(), emptyState.installedOnServer().stream());

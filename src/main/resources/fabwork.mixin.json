@@ -3,7 +3,7 @@
   "minVersion": "0.7",
   "package": "com.sollace.fabwork.impl.mixin",
   "refmap": "fabwork.mixin.refmap.json",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_17",
   "mixins": [
     "ServerCommonNetworkHandlerMixin"
   ],

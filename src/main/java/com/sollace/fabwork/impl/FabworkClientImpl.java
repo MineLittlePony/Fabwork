@@ -12,6 +12,7 @@ import com.sollace.fabwork.api.client.FabworkClient;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.*;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 
@@ -38,6 +39,7 @@ public class FabworkClientImpl implements ClientModInitializer {
                     STATE = EMPTY_STATE;
                 }, "Client connection init");
             });
+            PayloadTypeRegistry.configurationS2C().register(ConsentMessage.ID, ConsentMessage.CODEC);
             ClientConfigurationNetworking.registerGlobalReceiver(ConsentMessage.ID, (payload, context) -> {
                 LoaderUtil.invokeUntrusted(() -> {
                     STATE = new SynchronisationState(FabworkImpl.INSTANCE.getInstalledMods(), payload.entries().stream());
