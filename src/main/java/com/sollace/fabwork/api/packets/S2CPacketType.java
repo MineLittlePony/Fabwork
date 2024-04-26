@@ -8,6 +8,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.listener.ClientCommonPacketListener;
 import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
@@ -40,6 +41,14 @@ public record S2CPacketType<T extends Packet> (
         if (entity.getWorld() instanceof ServerWorld sw) {
             sw.getChunkManager().sendToNearbyPlayers(entity, toPacket(packet));
         }
+    }
+
+    public void sendToAllPlayers(T packet, MinecraftServer server) {
+        Objects.requireNonNull(server, "Server cannot be null");
+        var p = toPacket(packet);
+        server.getPlayerManager().getPlayerList().forEach(recipient -> {
+            recipient.networkHandler.sendPacket(p);
+        });
     }
 
     /**
