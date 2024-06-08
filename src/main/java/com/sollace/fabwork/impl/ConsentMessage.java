@@ -10,7 +10,7 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 
 public record ConsentMessage(List<ModEntryImpl> entries) implements CustomPayload {
-    public static final CustomPayload.Id<ConsentMessage> ID = new CustomPayload.Id<>(new Identifier("fabwork", "synchronize"));
+    public static final CustomPayload.Id<ConsentMessage> ID = new CustomPayload.Id<>(Identifier.of("fabwork", "synchronize"));
     public static final PacketCodec<PacketByteBuf, ConsentMessage> CODEC = CustomPayload.codecOf(
             (message, buffer) -> {
                 buffer.writeInt(FabworkServer.PROTOCOL_VERSION);
