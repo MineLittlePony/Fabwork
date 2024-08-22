@@ -30,6 +30,9 @@ public class FabworkServer implements ModInitializer {
             return;
         }
 
+        PayloadTypeRegistry.configurationS2C().register(ConsentMessage.ID, ConsentMessage.CODEC);
+        PayloadTypeRegistry.configurationC2S().register(ConsentMessage.ID, ConsentMessage.CODEC);
+
         final FabworkConfig config = FabworkConfig.INSTANCE.get();
         final SynchronisationState emptyState = new SynchronisationState(Stream.empty(),
                 makeDistinct(Streams.concat(FabworkImpl.INSTANCE.getInstalledMods().filter(ModEntryImpl::requiredOnEither), config.getCustomRequiredMods()))
@@ -62,7 +65,6 @@ public class FabworkServer implements ModInitializer {
                 }
             });
 
-            PayloadTypeRegistry.configurationC2S().register(ConsentMessage.ID, ConsentMessage.CODEC);
             ServerConfigurationNetworking.registerGlobalReceiver(ConsentMessage.ID, (payload, context) -> {
                 LoaderUtil.invokeUntrusted(() -> {
                     SynchronisationState state = new SynchronisationState(payload.entries().stream(), emptyState.installedOnServer().stream());
