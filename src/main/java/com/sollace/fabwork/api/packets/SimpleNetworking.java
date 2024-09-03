@@ -9,8 +9,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 
 /**
@@ -43,7 +41,7 @@ public interface SimpleNetworking {
      * @return A registered PacketType
      */
     static <T extends Packet> C2SPacketType<T> clientToServer(Identifier id, Function<PacketByteBuf, T> factory) {
-        return ServerSimpleNetworkingImpl.register(id, factory);
+        return ServerSimpleNetworkingImpl.registerC2S(id, factory);
     }
     /**
      * Registers a packet type for transmission to the client.
@@ -60,7 +58,6 @@ public interface SimpleNetworking {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             return ClientSimpleNetworkingImpl.register(id, factory);
         }
-        var packetId = new CustomPayload.Id<Payload<T>>(id);
-        return new S2CPacketType<>(packetId, Payload.createCodec(packetId, PacketCodec.of(Packet::toBuffer, factory::apply)), Receivers.empty(id));
+        return ServerSimpleNetworkingImpl.registerS2C(id, factory);
     }
 }

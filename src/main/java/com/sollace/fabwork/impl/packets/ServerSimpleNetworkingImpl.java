@@ -21,13 +21,20 @@ import net.minecraft.util.Identifier;
 public class ServerSimpleNetworkingImpl {
     private ServerSimpleNetworkingImpl() { throw new RuntimeException("new ServerSimpleNetworkingImpl()"); }
 
-    public static <T extends Packet> C2SPacketType<T> register(Identifier id, Function<PacketByteBuf, T> factory) {
+    public static <T extends Packet> C2SPacketType<T> registerC2S(Identifier id, Function<PacketByteBuf, T> factory) {
         var packetId = new CustomPayload.Id<Payload<T>>(id);
         var type = new C2SPacketType<>(packetId, Payload.createCodec(packetId, PacketCodec.of(Packet::toBuffer, factory::apply)), new ReceiverImpl<>(id));
         PayloadTypeRegistry.playC2S().register(type.id(), type.codec());
         ServerPlayNetworking.registerGlobalReceiver(type.id(), (payload, context) -> {
             context.player().server.execute(() -> ((ReceiverImpl<ServerPlayerEntity, T>)type.receiver()).onReceive(context.player(), payload.packet()));
         });
+        return type;
+    }
+
+    public static <T extends Packet> S2CPacketType<T> registerS2C(Identifier id, Function<PacketByteBuf, T> factory) {
+        var packetId = new CustomPayload.Id<Payload<T>>(id);
+        var type = new S2CPacketType<>(packetId, Payload.createCodec(packetId, PacketCodec.of(Packet::toBuffer, factory::apply)), Receivers.empty(id));
+        PayloadTypeRegistry.playS2C().register(type.id(), type.codec());
         return type;
     }
 
