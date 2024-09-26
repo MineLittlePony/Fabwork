@@ -13,7 +13,7 @@ import java.util.function.BiPredicate;
  * @param <Sender> The sending player
  * @param <P> The packet type received.
  */
-public interface Receiver<Sender, P extends Packet> {
+public interface Receiver<Sender, P> {
     /**
      * Adds a persistent listener.
      * Once registered, these listeners will remain registered for the lifetime of the client or until they throw an exception.

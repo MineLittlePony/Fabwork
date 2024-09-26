@@ -12,7 +12,7 @@ import net.minecraft.util.Identifier;
 public final class Receivers {
     private Receivers() { throw new RuntimeException("new Receivers()"); }
 
-    public static <Sender, P extends Packet> Receiver<Sender, P> empty(Identifier id) {
+    public static <Sender, P> Receiver<Sender, P> empty(Identifier id) {
         return new Receiver<>() {
             @Override
             public void addPersistentListener(BiConsumer<Sender, P> callback) {

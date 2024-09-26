@@ -4,7 +4,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
 
 /**
- * Represents a message that can be either send from the client to the server or back.
+ * Represents a message that can be either sent from the client to the server or back.
  * <p>
  * A recommended approach is to use {@link HandledPacket} and override handle(sender) for server-bound
  * packets and use {@link Packet} together with the receiver API

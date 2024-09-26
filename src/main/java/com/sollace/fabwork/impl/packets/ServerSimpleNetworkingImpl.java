@@ -3,8 +3,6 @@ package com.sollace.fabwork.impl.packets;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.*;
-import java.util.function.Function;
-
 import com.sollace.fabwork.api.packets.*;
 import com.sollace.fabwork.impl.ClientConnectionAccessor;
 import com.sollace.fabwork.impl.PlayPingSynchroniser;
@@ -12,7 +10,7 @@ import com.sollace.fabwork.impl.PlayPingSynchroniser;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -21,9 +19,9 @@ import net.minecraft.util.Identifier;
 public class ServerSimpleNetworkingImpl {
     private ServerSimpleNetworkingImpl() { throw new RuntimeException("new ServerSimpleNetworkingImpl()"); }
 
-    public static <T extends Packet> C2SPacketType<T> registerC2S(Identifier id, Function<PacketByteBuf, T> factory) {
+    public static <T> C2SPacketType<T> registerC2S(Identifier id, PacketCodec<? super RegistryByteBuf, T> codec) {
         var packetId = new CustomPayload.Id<Payload<T>>(id);
-        var type = new C2SPacketType<>(packetId, Payload.createCodec(packetId, PacketCodec.of(Packet::toBuffer, factory::apply)), new ReceiverImpl<>(id));
+        var type = new C2SPacketType<>(packetId, Payload.createCodec(packetId, codec), new ReceiverImpl<>(id));
         PayloadTypeRegistry.playC2S().register(type.id(), type.codec());
         ServerPlayNetworking.registerGlobalReceiver(type.id(), (payload, context) -> {
             context.player().server.execute(() -> ((ReceiverImpl<ServerPlayerEntity, T>)type.receiver()).onReceive(context.player(), payload.packet()));
@@ -31,15 +29,15 @@ public class ServerSimpleNetworkingImpl {
         return type;
     }
 
-    public static <T extends Packet> S2CPacketType<T> registerS2C(Identifier id, Function<PacketByteBuf, T> factory) {
+    public static <T> S2CPacketType<T> registerS2C(Identifier id, PacketCodec<? super RegistryByteBuf, T> codec) {
         var packetId = new CustomPayload.Id<Payload<T>>(id);
-        var type = new S2CPacketType<>(packetId, Payload.createCodec(packetId, PacketCodec.of(Packet::toBuffer, factory::apply)), Receivers.empty(id));
+        var type = new S2CPacketType<>(packetId, Payload.createCodec(packetId, codec), Receivers.empty(id));
         PayloadTypeRegistry.playS2C().register(type.id(), type.codec());
         return type;
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Packet> Future<T> waitForReponse(C2SPacketType<T> packetType, ClientConnection connection) {
+    public static <T> Future<T> waitForReponse(C2SPacketType<T> packetType, ClientConnection connection) {
         Objects.requireNonNull(connection, "Client Connection cannot be null");
 
         if (!connection.isOpen()) {

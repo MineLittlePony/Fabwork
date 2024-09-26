@@ -17,5 +17,16 @@ package com.sollace.fabwork.api.packets;
  *
  * @author Sollace
  */
-public interface HandledPacket<Sender> extends Packet, Handled<Sender> {
+public interface Handled<Sender> {
+    /**
+     * Called to handle this packet on the receiving end.
+     * <p>
+     * Implementors may optionally override this method,
+     * or register handlers using the receiver().
+     * <p>
+
+     *
+     * @param sender The player who initially sent this packet.
+     */
+    void handle(Sender sender);
 }

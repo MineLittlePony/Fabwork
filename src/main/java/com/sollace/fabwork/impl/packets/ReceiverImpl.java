@@ -11,7 +11,7 @@ import com.sollace.fabwork.api.packets.*;
 
 import net.minecraft.util.Identifier;
 
-final class ReceiverImpl<Sender, P extends Packet> implements Receiver<Sender, P> {
+final class ReceiverImpl<Sender, P> implements Receiver<Sender, P> {
     private static final Logger LOGGER = LogManager.getLogger();
     private final ListenerList persistentListeners = new ListenerList();
     private final ListenerList listeners = new ListenerList();

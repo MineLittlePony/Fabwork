@@ -9,7 +9,7 @@ import com.sollace.fabwork.impl.packets.ServerSimpleNetworkingImpl;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.listener.ServerCommonPacketListener;
 import net.minecraft.network.packet.CustomPayload;
@@ -23,9 +23,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
  * <p>
  * Responses can be sent back to the sending player by calling the appropriate send method on a S2CPacketType.
  */
-public record C2SPacketType<T extends Packet> (
+public record C2SPacketType<T> (
         CustomPayload.Id<Payload<T>> id,
-        PacketCodec<PacketByteBuf, Payload<T>> codec,
+        PacketCodec<RegistryByteBuf, Payload<T>> codec,
         Receiver<ServerPlayerEntity, T> receiver
     ) {
     /**
