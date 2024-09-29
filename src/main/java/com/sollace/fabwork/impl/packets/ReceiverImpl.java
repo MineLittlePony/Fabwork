@@ -39,9 +39,9 @@ final class ReceiverImpl<Sender, P> implements Receiver<Sender, P> {
     void onReceive(Sender sender, P packet) {
         persistentListeners.fire(sender, packet);
         listeners.fire(sender, packet);
-        if (packet instanceof HandledPacket) {
+        if (packet instanceof Handled handler) {
             try {
-                ((HandledPacket<Sender>)packet).handle(sender);
+                handler.handle(sender);
             } catch (Exception e) {
                 LOGGER.error("Exception whilst handling packet callback for handled packet " + id, e);
             }

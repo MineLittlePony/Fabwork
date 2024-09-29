@@ -11,9 +11,8 @@ package com.sollace.fabwork.api.packets;
  * or if the packet class they're creating extends a pre-established
  * packet from the base game.
  * <p>
- * Recommended approach is to use {@link HandledPacket} and override handle(sender) for server-bound
- * packets and use {@link Packet} together with the receiver API
- * to handle client-bound packets as this allows for better separation of client-specific code.
+ * Recommended approach is to use {@link Handled} and override handle(sender) for server-bound
+ * packets and use the receiver API to handle client-bound packets as this allows for better separation of client-specific code.
  *
  * @author Sollace
  */
@@ -24,7 +23,6 @@ public interface Handled<Sender> {
      * Implementors may optionally override this method,
      * or register handlers using the receiver().
      * <p>
-
      *
      * @param sender The player who initially sent this packet.
      */

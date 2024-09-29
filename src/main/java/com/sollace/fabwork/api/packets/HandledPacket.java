@@ -16,6 +16,8 @@ package com.sollace.fabwork.api.packets;
  * to handle client-bound packets as this allows for better separation of client-specific code.
  *
  * @author Sollace
+ * @deprecated The packet interface will be retired in 1.22. Use Handled<Sender> instead.
  */
+@Deprecated
 public interface HandledPacket<Sender> extends Packet, Handled<Sender> {
 }

@@ -41,6 +41,7 @@ public interface SimpleNetworking {
      *
      * @return A registered PacketType
      */
+    @Deprecated
     static <T extends Packet> C2SPacketType<T> clientToServer(Identifier id, Function<? super RegistryByteBuf, T> factory) {
         return clientToServer(id, PacketCodec.of(Packet::toBuffer, factory::apply));
     }
@@ -72,6 +73,7 @@ public interface SimpleNetworking {
      *
      * @return A registered PacketType
      */
+    @Deprecated
     static <T extends Packet> S2CPacketType<T> serverToClient(Identifier id, Function<? super RegistryByteBuf, T> factory) {
         return serverToClient(id, PacketCodec.of(Packet::toBuffer, factory::apply));
     }

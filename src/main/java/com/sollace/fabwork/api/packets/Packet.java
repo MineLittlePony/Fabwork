@@ -11,7 +11,9 @@ import net.minecraft.network.PacketByteBuf;
  * to handle client-bound packets as this allows for better separation of client-specific code.
  *
  * @author Sollace
+ * @deprecated The packet interface will be retired in 1.22. Use Handled<Sender> instead.
  */
+@Deprecated
 public interface Packet {
     /**
      * Writes this packet to the supplied buffer prior to transmission.
