@@ -38,6 +38,11 @@ public record C2SPacketType<T> (
         ClientSimpleNetworkingImpl.send(new Payload<>(packet, id));
     }
 
+    @Deprecated
+    public void sendToServer(Packet packet) {
+        sendToServer((T)packet);
+    }
+
     /**
      * Creates a single-use callback to invoke when receiving a packet from a particular client.
      * The returned future will either complete successfully with the incoming packet,
@@ -59,5 +64,10 @@ public record C2SPacketType<T> (
     public net.minecraft.network.packet.Packet<ServerCommonPacketListener> toPacket(T packet) {
         Objects.requireNonNull(packet, "Packet cannot be null");
         return ClientSimpleNetworkingImpl.createC2SPacket(new Payload<>(packet, id));
+    }
+
+    @Deprecated
+    public net.minecraft.network.packet.Packet<ServerCommonPacketListener> toPacket(Packet packet) {
+        return toPacket((T)packet);
     }
 }

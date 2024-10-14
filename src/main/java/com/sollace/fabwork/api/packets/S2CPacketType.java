@@ -26,6 +26,11 @@ public record S2CPacketType<T> (
         ServerPlayNetworking.send(recipient, new Payload<>(packet, id));
     }
 
+    @Deprecated
+    public void sendToPlayer(Packet packet, ServerPlayerEntity recipient) {
+        sendToPlayer((T)packet, recipient);
+    }
+
     public void sendToAllPlayers(T packet, World world) {
         Objects.requireNonNull(world, "Server world cannot be null");
         var p = toPacket(packet);
@@ -36,11 +41,21 @@ public record S2CPacketType<T> (
         });
     }
 
+    @Deprecated
+    public void sendToAllPlayers(Packet packet, World world) {
+        sendToAllPlayers((T)packet, world);
+    }
+
     public void sendToSurroundingPlayers(T packet, Entity entity) {
         Objects.requireNonNull(entity, "Entity cannot be null");
         if (entity.getWorld() instanceof ServerWorld sw) {
             sw.getChunkManager().sendToNearbyPlayers(entity, toPacket(packet));
         }
+    }
+
+    @Deprecated
+    public void sendToSurroundingPlayers(Packet packet, Entity entity) {
+        sendToSurroundingPlayers((T)packet, entity);
     }
 
     public void sendToAllPlayers(T packet, MinecraftServer server) {
@@ -51,11 +66,21 @@ public record S2CPacketType<T> (
         });
     }
 
+    @Deprecated
+    public void sendToAllPlayers(Packet packet, MinecraftServer server) {
+        sendToAllPlayers((T)packet, server);
+    }
+
     /**
      * Repackages a fabwork packet into a normal Minecraft protocol packet suitable for sending to a connected client.
      */
     public net.minecraft.network.packet.Packet<ClientCommonPacketListener> toPacket(T packet) {
         Objects.requireNonNull(packet, "Packet cannot be null");
         return ServerPlayNetworking.createS2CPacket(new Payload<>(packet, id));
+    }
+
+    @Deprecated
+    public net.minecraft.network.packet.Packet<ClientCommonPacketListener> toPacket(Packet packet) {
+        return toPacket((T)packet);
     }
 }
