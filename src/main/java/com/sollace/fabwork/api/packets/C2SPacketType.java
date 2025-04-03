@@ -38,6 +38,7 @@ public record C2SPacketType<T> (
         ClientSimpleNetworkingImpl.send(new Payload<>(packet, id));
     }
 
+    @SuppressWarnings("unchecked")
     @Deprecated
     public void sendToServer(Packet packet) {
         sendToServer((T)packet);
@@ -66,6 +67,7 @@ public record C2SPacketType<T> (
         return ClientSimpleNetworkingImpl.createC2SPacket(new Payload<>(packet, id));
     }
 
+    @SuppressWarnings("unchecked")
     @Deprecated
     public net.minecraft.network.packet.Packet<ServerCommonPacketListener> toPacket(Packet packet) {
         return toPacket((T)packet);

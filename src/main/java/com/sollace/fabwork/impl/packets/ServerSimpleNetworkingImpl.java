@@ -24,7 +24,7 @@ public class ServerSimpleNetworkingImpl {
         var type = new C2SPacketType<>(packetId, Payload.createCodec(packetId, codec), new ReceiverImpl<>(id));
         PayloadTypeRegistry.playC2S().register(type.id(), type.codec());
         ServerPlayNetworking.registerGlobalReceiver(type.id(), (payload, context) -> {
-            context.player().server.execute(() -> ((ReceiverImpl<ServerPlayerEntity, T>)type.receiver()).onReceive(context.player(), payload.packet()));
+            context.player().method_69130().getServer().execute(() -> ((ReceiverImpl<ServerPlayerEntity, T>)type.receiver()).onReceive(context.player(), payload.packet()));
         });
         return type;
     }

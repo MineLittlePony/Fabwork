@@ -8,6 +8,7 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.listener.ClientCommonPacketListener;
 import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.server.GameInstance;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -26,6 +27,7 @@ public record S2CPacketType<T> (
         ServerPlayNetworking.send(recipient, new Payload<>(packet, id));
     }
 
+    @SuppressWarnings("unchecked")
     @Deprecated
     public void sendToPlayer(Packet packet, ServerPlayerEntity recipient) {
         sendToPlayer((T)packet, recipient);
@@ -41,6 +43,7 @@ public record S2CPacketType<T> (
         });
     }
 
+    @SuppressWarnings("unchecked")
     @Deprecated
     public void sendToAllPlayers(Packet packet, World world) {
         sendToAllPlayers((T)packet, world);
@@ -53,6 +56,7 @@ public record S2CPacketType<T> (
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Deprecated
     public void sendToSurroundingPlayers(Packet packet, Entity entity) {
         sendToSurroundingPlayers((T)packet, entity);
@@ -61,14 +65,27 @@ public record S2CPacketType<T> (
     public void sendToAllPlayers(T packet, MinecraftServer server) {
         Objects.requireNonNull(server, "Server cannot be null");
         var p = toPacket(packet);
-        server.getPlayerManager().getPlayerList().forEach(recipient -> {
+        server.getGameInstance().getPlayerManager().getPlayerList().forEach(recipient -> {
             recipient.networkHandler.sendPacket(p);
         });
     }
 
+    @SuppressWarnings("unchecked")
     @Deprecated
     public void sendToAllPlayers(Packet packet, MinecraftServer server) {
         sendToAllPlayers((T)packet, server);
+    }
+
+    public void sendToAllPlayers(T packet, GameInstance game) {
+        Objects.requireNonNull(game, "Game cannot be null");
+        sendToAllPlayers(packet, game.getServer());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Deprecated
+    public void sendToAllPlayers(Packet packet, GameInstance game) {
+        Objects.requireNonNull(game, "Game cannot be null");
+        sendToAllPlayers((T)packet, game.getServer());
     }
 
     /**
@@ -79,6 +96,7 @@ public record S2CPacketType<T> (
         return ServerPlayNetworking.createS2CPacket(new Payload<>(packet, id));
     }
 
+    @SuppressWarnings("unchecked")
     @Deprecated
     public net.minecraft.network.packet.Packet<ClientCommonPacketListener> toPacket(Packet packet) {
         return toPacket((T)packet);

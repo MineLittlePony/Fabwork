@@ -49,7 +49,7 @@ public class FabworkClientImpl implements ClientModInitializer {
                 }, "Responding to server sync packet");
             });
 
-            ClientConfigurationConnectionEvents.READY.register((handler, client) -> {
+            ClientConfigurationConnectionEvents.COMPLETE.register((handler, client) -> {
                 LoaderUtil.invokeUntrusted(() -> {
                     STATE.verify(LOGGER, true).ifPresent(disconnectReason -> {
                        handler.onDisconnect(new DisconnectS2CPacket(disconnectReason));
