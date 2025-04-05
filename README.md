@@ -18,7 +18,7 @@ If all you need from fabwork is the validation aspect, then there are no code ch
 Any mods that include the optional "fabwork" custom attribute in their fabric.mod.json will be considered when joining a server.
 
 fabric.mod.json
-```
+```json
 {
   "custom": {
       "fabwork": {
@@ -36,7 +36,7 @@ If you have Fabwork installed on the server, you can specify additional join req
 Mod ids added to the "requiredModIds" list will be automatically included when determining whether a client is able to connect.
 
 fabwork.json
-```
+```json
 {
   "requiredModIds": [
     "fabric-api", ...
@@ -50,7 +50,7 @@ For more advanced betworking tools, look into the included SimpleNetworking clas
 To register packets, call either SimpleNetworking.clientToServer or SimpleNetworking.serverToClient and store the returned type statically
 like you would a block or item.
 
-```
+```java
 class ExampleMod implements ModInitializer {
   // registration
   C2SPacketType<ExampleServerBoundPacket> EXAMPLE_SERVER_BOUND = SimpleNetworking.clientToServer(new Identifier("modid", "example_server_bound"), ExampleServerBoundPacket::new);
