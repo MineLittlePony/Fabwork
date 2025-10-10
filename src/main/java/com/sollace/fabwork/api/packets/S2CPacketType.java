@@ -26,7 +26,11 @@ public record S2CPacketType<T> (
         ServerPlayNetworking.send(recipient, new Payload<>(packet, id));
     }
 
-    @Deprecated
+    /**
+     * @deprecated Will be removed in MC1.22
+     */
+    @SuppressWarnings("unchecked")
+    @Deprecated(forRemoval = true)
     public void sendToPlayer(Packet packet, ServerPlayerEntity recipient) {
         sendToPlayer((T)packet, recipient);
     }
@@ -41,19 +45,27 @@ public record S2CPacketType<T> (
         });
     }
 
-    @Deprecated
+    /**
+     * @deprecated Will be removed in MC1.22
+     */
+    @SuppressWarnings("unchecked")
+    @Deprecated(forRemoval = true)
     public void sendToAllPlayers(Packet packet, World world) {
         sendToAllPlayers((T)packet, world);
     }
 
     public void sendToSurroundingPlayers(T packet, Entity entity) {
         Objects.requireNonNull(entity, "Entity cannot be null");
-        if (entity.getWorld() instanceof ServerWorld sw) {
+        if (entity.getEntityWorld() instanceof ServerWorld sw) {
             sw.getChunkManager().sendToNearbyPlayers(entity, toPacket(packet));
         }
     }
 
-    @Deprecated
+    /**
+     * @deprecated Will be removed in MC1.22
+     */
+    @SuppressWarnings("unchecked")
+    @Deprecated(forRemoval = true)
     public void sendToSurroundingPlayers(Packet packet, Entity entity) {
         sendToSurroundingPlayers((T)packet, entity);
     }
@@ -66,7 +78,11 @@ public record S2CPacketType<T> (
         });
     }
 
-    @Deprecated
+    /**
+     * @deprecated Will be removed in MC1.22
+     */
+    @SuppressWarnings("unchecked")
+    @Deprecated(forRemoval = true)
     public void sendToAllPlayers(Packet packet, MinecraftServer server) {
         sendToAllPlayers((T)packet, server);
     }
@@ -79,7 +95,11 @@ public record S2CPacketType<T> (
         return ServerPlayNetworking.createS2CPacket(new Payload<>(packet, id));
     }
 
-    @Deprecated
+    /**
+     * @deprecated Will be removed in MC1.22
+     */
+    @SuppressWarnings("unchecked")
+    @Deprecated(forRemoval = true)
     public net.minecraft.network.packet.Packet<ClientCommonPacketListener> toPacket(Packet packet) {
         return toPacket((T)packet);
     }

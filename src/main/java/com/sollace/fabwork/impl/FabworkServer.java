@@ -46,7 +46,7 @@ public class FabworkServer implements ModInitializer {
                     handler.addTask(new ServerPlayerConfigurationTask() {
                         @Override
                         public void sendPacket(Consumer<Packet<?>> sender) {
-                            LOGGER.info("Sending mod list to {}[{}]", handler.getDebugProfile().getName(), connection.getAddress());
+                            LOGGER.info("Sending mod list to {}[{}]", handler.getDebugProfile().name(), connection.getAddress());
                             sender.accept(ServerConfigurationNetworking.createS2CPacket(new ConsentMessage(emptyState.installedOnServer())));
                         }
 
@@ -56,9 +56,9 @@ public class FabworkServer implements ModInitializer {
                         }
                     });
                 } else {
-                    LOGGER.warn("{}[{}] does not appear to have fabwork installed", handler.getDebugProfile().getName(), connection.getAddress());
+                    LOGGER.warn("{}[{}] does not appear to have fabwork installed", handler.getDebugProfile().name(), connection.getAddress());
                     if (config.allowUnmoddedClients) {
-                        LOGGER.warn("Connection to {}[{}] has been force permitted by server configuration. They are allowed to join checking installed mods! Their game may be broken upon joining!", handler.getDebugProfile().getName(), connection.getAddress());
+                        LOGGER.warn("Connection to {}[{}] has been force permitted by server configuration. They are allowed to join checking installed mods! Their game may be broken upon joining!", handler.getDebugProfile().name(), connection.getAddress());
                     } else {
                         emptyState.verify(LOGGER, false).ifPresent(handler::disconnect);
                     }
@@ -69,7 +69,7 @@ public class FabworkServer implements ModInitializer {
                 LoaderUtil.invokeUntrusted(() -> {
                     SynchronisationState state = new SynchronisationState(payload.entries().stream(), emptyState.installedOnServer().stream());
                     ClientConnection connection = ClientConnectionAccessor.get(context.networkHandler());
-                    LOGGER.info("Got mod list from {}[{}]: {}", context.networkHandler().getDebugProfile().getName(), connection.getAddress(), ModEntriesUtil.stringify(state.installedOnClient()));
+                    LOGGER.info("Got mod list from {}[{}]: {}", context.networkHandler().getDebugProfile().name(), connection.getAddress(), ModEntriesUtil.stringify(state.installedOnClient()));
                     state.verify(LOGGER, true).ifPresentOrElse(context.networkHandler()::disconnect, () -> context.networkHandler().completeTask(MOD_LIST_SYNC_TASK));
                 }, "Received synchronize response from client");
             });

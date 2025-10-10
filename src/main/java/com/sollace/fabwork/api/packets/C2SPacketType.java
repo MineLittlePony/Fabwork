@@ -38,7 +38,12 @@ public record C2SPacketType<T> (
         ClientSimpleNetworkingImpl.send(new Payload<>(packet, id));
     }
 
-    @Deprecated
+
+    /**
+     * @deprecated Will be removed in MC1.22
+     */
+    @SuppressWarnings("unchecked")
+    @Deprecated(forRemoval = true)
     public void sendToServer(Packet packet) {
         sendToServer((T)packet);
     }
@@ -66,7 +71,12 @@ public record C2SPacketType<T> (
         return ClientSimpleNetworkingImpl.createC2SPacket(new Payload<>(packet, id));
     }
 
-    @Deprecated
+
+    /**
+     * @deprecated Will be removed in MC1.22
+     */
+    @SuppressWarnings("unchecked")
+    @Deprecated(forRemoval = true)
     public net.minecraft.network.packet.Packet<ServerCommonPacketListener> toPacket(Packet packet) {
         return toPacket((T)packet);
     }

@@ -26,7 +26,7 @@ abstract class ServerCommonNetworkHandlerMixin implements ServerCommonPacketList
 
     @Inject(method = "onPong(Lnet/minecraft/network/packet/c2s/common/CommonPongC2SPacket;)V", at = @At("HEAD"))
     private void onOnPong(CommonPongC2SPacket packet, CallbackInfo info) {
-        NetworkThreadUtils.forceMainThread(packet, this, server);
+        NetworkThreadUtils.forceMainThread(packet, this, server.getPacketApplyBatcher());
         PlayPingSynchroniser.onClientResponse(packet, server);
     }
 
