@@ -5,32 +5,32 @@ import com.sollace.fabwork.api.packets.S2CPacketType;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.listener.ServerCommonPacketListener;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.ServerCommonPacketListener;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 
 public final class ClientSimpleNetworkingImpl {
     private ClientSimpleNetworkingImpl() { throw new RuntimeException("new ClientSimpleNetworkingImpl()"); }
 
     @SuppressWarnings("unchecked")
-    public static <T> S2CPacketType<T> register(Identifier id, PacketCodec<? super RegistryByteBuf, T> codec) {
-        var packetId = new CustomPayload.Id<Payload<T>>(id);
+    public static <T> S2CPacketType<T> register(Identifier id, StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
+        var packetId = new CustomPacketPayload.Type<Payload<T>>(id);
         var type = new S2CPacketType<>(packetId, Payload.createCodec(packetId, codec), new ReceiverImpl<>(id));
-        PayloadTypeRegistry.playS2C().register(type.id(), type.codec());
+        PayloadTypeRegistry.clientboundPlay().register(type.id(), type.codec());
         ClientPlayNetworking.registerGlobalReceiver(type.id(), (payload, context) -> {
-            context.client().execute(() -> ((ReceiverImpl<PlayerEntity, T>)type.receiver()).onReceive(context.player(), payload.packet()));
+            context.client().execute(() -> ((ReceiverImpl<Player, T>)type.receiver()).onReceive(context.player(), payload.packet()));
         });
         return type;
     }
 
-    public static void send(CustomPayload payload) {
+    public static void send(CustomPacketPayload payload) {
         ClientPlayNetworking.send(payload);
     }
 
-    public static net.minecraft.network.packet.Packet<ServerCommonPacketListener> createC2SPacket(CustomPayload payload) {
-        return ClientPlayNetworking.createC2SPacket(payload);
+    public static net.minecraft.network.protocol.Packet<ServerCommonPacketListener> createC2SPacket(CustomPacketPayload payload) {
+        return ClientPlayNetworking.createServerboundPacket(payload);
     }
 }

@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import com.sollace.fabwork.api.ModEntry;
 import com.sollace.fabwork.api.client.ModProvisionCallback;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 record SynchronisationState(
         List<ModEntryImpl> installedOnClient,
@@ -20,7 +20,7 @@ record SynchronisationState(
         this(installedOnClient.toList(), installedOnServer.toList());
     }
 
-    public Optional<Text> verify(Logger logger, boolean useTranslation) {
+    public Optional<Component> verify(Logger logger, boolean useTranslation) {
         Set<String> missingOnServer = ModEntriesUtil.compare(installedOnClient.stream().filter(c -> c.requirement().isRequiredOnServer()), installedOnServer);
         Set<String> missingOnClient = ModEntriesUtil.compare(installedOnServer.stream().filter(c -> c.requirement().isRequiredOnClient()), installedOnClient);
 
@@ -29,7 +29,7 @@ record SynchronisationState(
         });
 
         if (!missingOnServer.isEmpty() || !missingOnClient.isEmpty()) {
-            Text errorMessage = createErrorMessage(missingOnServer, missingOnClient, useTranslation);
+            Component errorMessage = createErrorMessage(missingOnServer, missingOnClient, useTranslation);
             logger.error(errorMessage.getString());
 
             if (FabworkConfig.INSTANCE.get().doNotEnforceModMatching) {
@@ -46,25 +46,25 @@ record SynchronisationState(
         return Optional.empty();
     }
 
-    private Text createErrorMessage(Set<String> missingOnServer, Set<String> missingOnClient, boolean useTranslation) {
+    private Component createErrorMessage(Set<String> missingOnServer, Set<String> missingOnClient, boolean useTranslation) {
         String serverMissing = String.join(", ", missingOnServer.stream().toArray(CharSequence[]::new));
         String clientMissing = String.join(", ", missingOnClient.stream().toArray(CharSequence[]::new));
 
         if (missingOnClient.isEmpty()) {
-            return Text.translatable(
+            return Component.translatable(
                     useTranslation ? "fabwork.error.server_missing_mods" : "Server is missing required mod(s). Remove these from your client to join this server. [%s]",
                     serverMissing
             );
         }
 
         if (missingOnServer.isEmpty()) {
-            return Text.translatable(
+            return Component.translatable(
                     useTranslation ? "fabwork.error.client_missing_mods" : "Client is missing required mod(s). Add these to your client to join this server. [%s]",
                     clientMissing
             );
         }
 
-        return Text.translatable(
+        return Component.translatable(
                 useTranslation ? "fabwork.error.both_missing_mods" : "Client and Server are missing required mod(s). Client needs to install [%s] and remove [%s] in order to join this server.",
                 clientMissing, serverMissing
         );

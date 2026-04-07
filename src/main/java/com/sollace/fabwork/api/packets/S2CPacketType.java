@@ -2,26 +2,26 @@ package com.sollace.fabwork.api.packets;
 
 import java.util.Objects;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.listener.ClientCommonPacketListener;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.ClientCommonPacketListener;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 /**
  * A client packet type. Sent by the server to a specific player.
  */
 public record S2CPacketType<T> (
-        CustomPayload.Id<Payload<T>> id,
-        PacketCodec<RegistryByteBuf, Payload<T>> codec,
-        Receiver<? extends PlayerEntity, T> receiver
+        CustomPacketPayload.Type<Payload<T>> id,
+        StreamCodec<RegistryFriendlyByteBuf, Payload<T>> codec,
+        Receiver<? extends Player, T> receiver
     ) {
-    public void sendToPlayer(T packet, ServerPlayerEntity recipient) {
+    public void sendToPlayer(T packet, ServerPlayer recipient) {
         Objects.requireNonNull(packet, "Packet cannot be null");
         ServerPlayNetworking.send(recipient, new Payload<>(packet, id));
     }
@@ -31,16 +31,16 @@ public record S2CPacketType<T> (
      */
     @SuppressWarnings("unchecked")
     @Deprecated(forRemoval = true)
-    public void sendToPlayer(Packet packet, ServerPlayerEntity recipient) {
+    public void sendToPlayer(Packet packet, ServerPlayer recipient) {
         sendToPlayer((T)packet, recipient);
     }
 
-    public void sendToAllPlayers(T packet, World world) {
+    public void sendToAllPlayers(T packet, Level world) {
         Objects.requireNonNull(world, "Server world cannot be null");
         var p = toPacket(packet);
-        world.getPlayers().forEach(player -> {
-            if (player instanceof ServerPlayerEntity spe) {
-                spe.networkHandler.sendPacket(p);
+        world.players().forEach(player -> {
+            if (player instanceof ServerPlayer spe) {
+                spe.connection.send(p);
             }
         });
     }
@@ -50,14 +50,14 @@ public record S2CPacketType<T> (
      */
     @SuppressWarnings("unchecked")
     @Deprecated(forRemoval = true)
-    public void sendToAllPlayers(Packet packet, World world) {
+    public void sendToAllPlayers(Packet packet, Level world) {
         sendToAllPlayers((T)packet, world);
     }
 
     public void sendToSurroundingPlayers(T packet, Entity entity) {
         Objects.requireNonNull(entity, "Entity cannot be null");
-        if (entity.getEntityWorld() instanceof ServerWorld sw) {
-            sw.getChunkManager().sendToNearbyPlayers(entity, toPacket(packet));
+        if (entity.level() instanceof ServerLevel sw) {
+            sw.getChunkSource().sendToTrackingPlayersAndSelf(entity, toPacket(packet));
         }
     }
 
@@ -73,8 +73,8 @@ public record S2CPacketType<T> (
     public void sendToAllPlayers(T packet, MinecraftServer server) {
         Objects.requireNonNull(server, "Server cannot be null");
         var p = toPacket(packet);
-        server.getPlayerManager().getPlayerList().forEach(recipient -> {
-            recipient.networkHandler.sendPacket(p);
+        server.getPlayerList().getPlayers().forEach(recipient -> {
+            recipient.connection.send(p);
         });
     }
 
@@ -90,9 +90,9 @@ public record S2CPacketType<T> (
     /**
      * Repackages a fabwork packet into a normal Minecraft protocol packet suitable for sending to a connected client.
      */
-    public net.minecraft.network.packet.Packet<ClientCommonPacketListener> toPacket(T packet) {
+    public net.minecraft.network.protocol.Packet<ClientCommonPacketListener> toPacket(T packet) {
         Objects.requireNonNull(packet, "Packet cannot be null");
-        return ServerPlayNetworking.createS2CPacket(new Payload<>(packet, id));
+        return ServerPlayNetworking.createClientboundPacket(new Payload<>(packet, id));
     }
 
     /**
@@ -100,7 +100,7 @@ public record S2CPacketType<T> (
      */
     @SuppressWarnings("unchecked")
     @Deprecated(forRemoval = true)
-    public net.minecraft.network.packet.Packet<ClientCommonPacketListener> toPacket(Packet packet) {
+    public net.minecraft.network.protocol.Packet<ClientCommonPacketListener> toPacket(Packet packet) {
         return toPacket((T)packet);
     }
 }

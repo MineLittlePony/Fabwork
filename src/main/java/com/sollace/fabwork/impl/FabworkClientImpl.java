@@ -13,7 +13,7 @@ import com.sollace.fabwork.api.client.FabworkClient;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.*;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
+import net.minecraft.network.DisconnectionDetails;
 
 public class FabworkClientImpl implements ClientModInitializer {
     private static final Logger LOGGER = LogManager.getLogger("Fabwork::CLIENT");
@@ -29,8 +29,7 @@ public class FabworkClientImpl implements ClientModInitializer {
         }
 
         if (!FabworkConfig.INSTANCE.get().disableLoginProtocol) {
-
-            ClientConfigurationConnectionEvents.INIT.register((handler, client) -> {
+            ClientConfigurationConnectionEvents.INIT.register((_, _) -> {
                 LoaderUtil.invokeUntrusted(() -> {
                     STATE.installedOnServer().forEach(entry -> {
                         ModProvisionCallback.EVENT.invoker().onModProvisioned(entry, false);
@@ -49,10 +48,10 @@ public class FabworkClientImpl implements ClientModInitializer {
                 }, "Responding to server sync packet");
             });
 
-            ClientConfigurationConnectionEvents.COMPLETE.register((handler, client) -> {
+            ClientConfigurationConnectionEvents.COMPLETE.register((handler, _) -> {
                 LoaderUtil.invokeUntrusted(() -> {
                     STATE.verify(LOGGER, true).ifPresent(disconnectReason -> {
-                       handler.onDisconnect(new DisconnectS2CPacket(disconnectReason));
+                       handler.onDisconnect(new DisconnectionDetails(disconnectReason));
                     });
                 }, "Entering play state");
             });

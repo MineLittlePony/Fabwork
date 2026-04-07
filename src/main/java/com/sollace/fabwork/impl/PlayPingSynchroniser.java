@@ -7,9 +7,9 @@ import org.jetbrains.annotations.Nullable;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.packet.c2s.common.CommonPongC2SPacket;
-import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.common.ClientboundPingPacket;
+import net.minecraft.network.protocol.common.ServerboundPongPacket;
 
 public class PlayPingSynchroniser {
     private static final Long2ObjectMap<Consumer<ResponseType>> PENDING_CALLBACKS = new Long2ObjectLinkedOpenHashMap<>();
@@ -29,16 +29,16 @@ public class PlayPingSynchroniser {
         }
     }
 
-    public static void waitForClientResponse(ClientConnection connection, Consumer<ResponseType> callback) {
-        if (connection.isOpen()) {
-            connection.send(new CommonPingS2CPacket(enqueueReponseCallback(callback)));
+    public static void waitForClientResponse(Connection connection, Consumer<ResponseType> callback) {
+        if (connection.isConnected()) {
+            connection.send(new ClientboundPingPacket(enqueueReponseCallback(callback)));
         } else {
             callback.accept(ResponseType.ABORTED);
         }
     }
 
-    public static void onClientResponse(CommonPongC2SPacket packet, Executor executor) {
-        Consumer<ResponseType> callback = dequeueResponseCallback(packet.getParameter());
+    public static void onClientResponse(ServerboundPongPacket packet, Executor executor) {
+        Consumer<ResponseType> callback = dequeueResponseCallback(packet.getId());
         if (callback != null) {
             executor.execute(() -> callback.accept(ResponseType.COMPLETED));
         }

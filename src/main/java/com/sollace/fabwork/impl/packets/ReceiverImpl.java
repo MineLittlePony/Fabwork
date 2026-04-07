@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.sollace.fabwork.api.packets.*;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 final class ReceiverImpl<Sender, P> implements Receiver<Sender, P> {
     private static final Logger LOGGER = LogManager.getLogger();

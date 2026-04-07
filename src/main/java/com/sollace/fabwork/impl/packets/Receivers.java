@@ -7,7 +7,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import com.sollace.fabwork.api.packets.*;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public final class Receivers {
     private Receivers() { throw new RuntimeException("new Receivers()"); }

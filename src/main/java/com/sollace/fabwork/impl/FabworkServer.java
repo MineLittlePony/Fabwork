@@ -13,13 +13,13 @@ import com.sollace.fabwork.api.Fabwork;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.*;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.server.network.ServerPlayerConfigurationTask;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.network.ConfigurationTask;
 
 public class FabworkServer implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("Fabwork::SERVER");
-    public static final ServerPlayerConfigurationTask.Key MOD_LIST_SYNC_TASK = new ServerPlayerConfigurationTask.Key(ConsentMessage.ID.id().toString());
+    public static final ConfigurationTask.Type MOD_LIST_SYNC_TASK = new ConfigurationTask.Type(ConsentMessage.ID.id().toString());
     public static final int PROTOCOL_VERSION = 1;
 
     public static final Fabwork FABWORK = FabworkImpl.INSTANCE;
@@ -30,8 +30,8 @@ public class FabworkServer implements ModInitializer {
             return;
         }
 
-        PayloadTypeRegistry.configurationS2C().register(ConsentMessage.ID, ConsentMessage.CODEC);
-        PayloadTypeRegistry.configurationC2S().register(ConsentMessage.ID, ConsentMessage.CODEC);
+        PayloadTypeRegistry.clientboundConfiguration().register(ConsentMessage.ID, ConsentMessage.STREAM_CODEC);
+        PayloadTypeRegistry.serverboundConfiguration().register(ConsentMessage.ID, ConsentMessage.STREAM_CODEC);
 
         final FabworkConfig config = FabworkConfig.INSTANCE.get();
         final SynchronisationState emptyState = new SynchronisationState(Stream.empty(),
@@ -39,26 +39,26 @@ public class FabworkServer implements ModInitializer {
         );
 
         if (!config.disableLoginProtocol) {
-            ServerConfigurationConnectionEvents.CONFIGURE.register((handler, server) -> {
-                ClientConnection connection = ClientConnectionAccessor.get(handler);
+            ServerConfigurationConnectionEvents.CONFIGURE.register((handler, _) -> {
+                Connection connection = ClientConnectionAccessor.get(handler);
 
                 if (ServerConfigurationNetworking.canSend(handler, ConsentMessage.ID)) {
-                    handler.addTask(new ServerPlayerConfigurationTask() {
+                    handler.addTask(new ConfigurationTask() {
                         @Override
-                        public void sendPacket(Consumer<Packet<?>> sender) {
-                            LOGGER.info("Sending mod list to {}[{}]", handler.getDebugProfile().name(), connection.getAddress());
-                            sender.accept(ServerConfigurationNetworking.createS2CPacket(new ConsentMessage(emptyState.installedOnServer())));
+                        public void start(Consumer<Packet<?>> sender) {
+                            LOGGER.info("Sending mod list to {}[{}]", handler.getOwner().name(), connection.getLoggableAddress(true));
+                            sender.accept(ServerConfigurationNetworking.createClientboundPacket(new ConsentMessage(emptyState.installedOnServer())));
                         }
 
                         @Override
-                        public Key getKey() {
+                        public Type type() {
                             return MOD_LIST_SYNC_TASK;
                         }
                     });
                 } else {
-                    LOGGER.warn("{}[{}] does not appear to have fabwork installed", handler.getDebugProfile().name(), connection.getAddress());
+                    LOGGER.warn("{}[{}] does not appear to have fabwork installed", handler.getOwner().name(), connection.getLoggableAddress(true));
                     if (config.allowUnmoddedClients) {
-                        LOGGER.warn("Connection to {}[{}] has been force permitted by server configuration. They are allowed to join checking installed mods! Their game may be broken upon joining!", handler.getDebugProfile().name(), connection.getAddress());
+                        LOGGER.warn("Connection to {}[{}] has been force permitted by server configuration. They are allowed to join checking installed mods! Their game may be broken upon joining!", handler.getOwner().name(), connection.getLoggableAddress(true));
                     } else {
                         emptyState.verify(LOGGER, false).ifPresent(handler::disconnect);
                     }
@@ -68,9 +68,9 @@ public class FabworkServer implements ModInitializer {
             ServerConfigurationNetworking.registerGlobalReceiver(ConsentMessage.ID, (payload, context) -> {
                 LoaderUtil.invokeUntrusted(() -> {
                     SynchronisationState state = new SynchronisationState(payload.entries().stream(), emptyState.installedOnServer().stream());
-                    ClientConnection connection = ClientConnectionAccessor.get(context.networkHandler());
-                    LOGGER.info("Got mod list from {}[{}]: {}", context.networkHandler().getDebugProfile().name(), connection.getAddress(), ModEntriesUtil.stringify(state.installedOnClient()));
-                    state.verify(LOGGER, true).ifPresentOrElse(context.networkHandler()::disconnect, () -> context.networkHandler().completeTask(MOD_LIST_SYNC_TASK));
+                    Connection connection = ClientConnectionAccessor.get(context.packetListener());
+                    LOGGER.info("Got mod list from {}[{}]: {}", context.packetListener().getOwner().name(), connection.getLoggableAddress(true), ModEntriesUtil.stringify(state.installedOnClient()));
+                    state.verify(LOGGER, true).ifPresentOrElse(context.packetListener()::disconnect, () -> context.packetListener().completeTask(MOD_LIST_SYNC_TASK));
                 }, "Received synchronize response from client");
             });
         }
@@ -82,7 +82,7 @@ public class FabworkServer implements ModInitializer {
     private static Stream<ModEntryImpl> makeDistinct(Stream<ModEntryImpl> entries) {
         Map<String, ModEntryImpl> map = new HashMap<>();
         entries.forEach(entry -> {
-            map.compute(entry.modId(), (id, value) -> value == null || entry.requirement().supercedes(value.requirement()) ? entry : value);
+            map.compute(entry.modId(), (_, value) -> value == null || entry.requirement().supercedes(value.requirement()) ? entry : value);
         });
         return map.values().stream();
     }

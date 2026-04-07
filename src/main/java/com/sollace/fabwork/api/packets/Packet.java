@@ -1,7 +1,7 @@
 package com.sollace.fabwork.api.packets;
 
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.network.PacketByteBuf;
+import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
+import net.minecraft.network.FriendlyByteBuf;
 
 /**
  * Represents a message that can be either sent from the client to the server or back.
@@ -20,15 +20,17 @@ public interface Packet {
      *
      * @param buffer The buffer to write to.
      */
-    void toBuffer(PacketByteBuf buffer);
+    @Deprecated
+    void toBuffer(FriendlyByteBuf buffer);
 
     /**
      * Writes this packet to a new buffer.
      *
      * @return The resulting buffer for transmission
      */
-    default PacketByteBuf toBuffer() {
-        PacketByteBuf buf = PacketByteBufs.create();
+    @Deprecated
+    default FriendlyByteBuf toBuffer() {
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         toBuffer(buf);
         return buf;
     }

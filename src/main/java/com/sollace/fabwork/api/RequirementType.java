@@ -2,6 +2,12 @@ package com.sollace.fabwork.api;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.IntFunction;
+
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ByIdMap;
 
 /**
  * An installation requirement used to indicate in which environments a mod needs to be available
@@ -31,6 +37,9 @@ public enum RequirementType {
      * Mod is required on both client and server
      */
     BOTH;
+
+    public static final IntFunction<RequirementType> BY_ID = ByIdMap.continuous(RequirementType::ordinal, values(), ByIdMap.OutOfBoundsStrategy.WRAP);
+    public static final StreamCodec<ByteBuf, RequirementType> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, RequirementType::ordinal);
 
     public boolean requiredOnEither() {
         return this != RequirementType.NONE;

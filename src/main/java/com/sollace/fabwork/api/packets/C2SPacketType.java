@@ -9,11 +9,11 @@ import com.sollace.fabwork.impl.packets.ServerSimpleNetworkingImpl;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.listener.ServerCommonPacketListener;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.ServerCommonPacketListener;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * A server-bound packet type. Sent by the client to the server.
@@ -24,9 +24,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
  * Responses can be sent back to the sending player by calling the appropriate send method on a S2CPacketType.
  */
 public record C2SPacketType<T> (
-        CustomPayload.Id<Payload<T>> id,
-        PacketCodec<RegistryByteBuf, Payload<T>> codec,
-        Receiver<ServerPlayerEntity, T> receiver
+        CustomPacketPayload.Type<Payload<T>> id,
+        StreamCodec<RegistryFriendlyByteBuf, Payload<T>> codec,
+        Receiver<ServerPlayer, T> receiver
     ) {
     /**
      * Sends a packet to be handled by the server.
@@ -38,14 +38,13 @@ public record C2SPacketType<T> (
         ClientSimpleNetworkingImpl.send(new Payload<>(packet, id));
     }
 
-
     /**
      * @deprecated Will be removed in MC1.22
      */
     @SuppressWarnings("unchecked")
     @Deprecated(forRemoval = true)
-    public void sendToServer(Packet packet) {
-        sendToServer((T)packet);
+    public void sendToServer(Packet payload) {
+        sendToServer((T)payload);
     }
 
     /**
@@ -58,17 +57,17 @@ public record C2SPacketType<T> (
      * @param client The client entity to expect a response from.
      * @return A future representing the pending incoming request.
      */
-    public Future<T> awaitResponseFrom(ServerPlayerEntity client) {
+    public Future<T> awaitResponseFrom(ServerPlayer client) {
         Objects.requireNonNull(client, "Client player cannot be null");
-        return ServerSimpleNetworkingImpl.waitForReponse(this, ClientConnectionAccessor.get(client.networkHandler));
+        return ServerSimpleNetworkingImpl.waitForReponse(this, ClientConnectionAccessor.get(client.connection));
     }
 
     /**
      * Repackages a Fabwork packet into a normal Minecraft protocol packet suitable for sending to the connected server.
      */
-    public net.minecraft.network.packet.Packet<ServerCommonPacketListener> toPacket(T packet) {
-        Objects.requireNonNull(packet, "Packet cannot be null");
-        return ClientSimpleNetworkingImpl.createC2SPacket(new Payload<>(packet, id));
+    public net.minecraft.network.protocol.Packet<ServerCommonPacketListener> toPacket(T payload) {
+        Objects.requireNonNull(payload, "Payload cannot be null");
+        return ClientSimpleNetworkingImpl.createC2SPacket(new Payload<>(payload, id));
     }
 
 
@@ -77,7 +76,7 @@ public record C2SPacketType<T> (
      */
     @SuppressWarnings("unchecked")
     @Deprecated(forRemoval = true)
-    public net.minecraft.network.packet.Packet<ServerCommonPacketListener> toPacket(Packet packet) {
-        return toPacket((T)packet);
+    public net.minecraft.network.protocol.Packet<ServerCommonPacketListener> toPacket(Packet payload) {
+        return toPacket((T)payload);
     }
 }

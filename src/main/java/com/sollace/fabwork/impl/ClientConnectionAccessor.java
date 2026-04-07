@@ -1,12 +1,12 @@
 package com.sollace.fabwork.impl;
 
-import net.minecraft.network.ClientConnection;
-import net.minecraft.server.network.ServerCommonNetworkHandler;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.common.ServerCommonPacketListener;
 
 public interface ClientConnectionAccessor {
-    ClientConnection getConnection();
+    Connection getConnection();
 
-    static ClientConnection get(ServerCommonNetworkHandler handler) {
+    static Connection get(ServerCommonPacketListener handler) {
         return ((ClientConnectionAccessor)handler).getConnection();
     }
 }

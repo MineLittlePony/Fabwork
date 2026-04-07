@@ -8,9 +8,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 
 /**
  * A side-agnostic, and declaritive wrapper around {@link ServerPlayNetworking} and {@link ClientPlayNetworking}
@@ -42,8 +42,8 @@ public interface SimpleNetworking {
      * @return A registered PacketType
      */
     @Deprecated
-    static <T extends Packet> C2SPacketType<T> clientToServer(Identifier id, Function<? super RegistryByteBuf, T> factory) {
-        return clientToServer(id, PacketCodec.of(Packet::toBuffer, factory::apply));
+    static <T extends Packet> C2SPacketType<T> clientToServer(Identifier id, Function<? super RegistryFriendlyByteBuf, T> factory) {
+        return clientToServer(id, StreamCodec.ofMember(Packet::toBuffer, factory::apply));
     }
 
     /**
@@ -58,7 +58,7 @@ public interface SimpleNetworking {
      *
      * @return A registered PacketType
      */
-    static <T> C2SPacketType<T> clientToServer(Identifier id, PacketCodec<? super RegistryByteBuf, T> codec) {
+    static <T> C2SPacketType<T> clientToServer(Identifier id, StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
         return ServerSimpleNetworkingImpl.registerC2S(id, codec);
     }
 
@@ -74,8 +74,8 @@ public interface SimpleNetworking {
      * @return A registered PacketType
      */
     @Deprecated
-    static <T extends Packet> S2CPacketType<T> serverToClient(Identifier id, Function<? super RegistryByteBuf, T> factory) {
-        return serverToClient(id, PacketCodec.of(Packet::toBuffer, factory::apply));
+    static <T extends Packet> S2CPacketType<T> serverToClient(Identifier id, Function<? super RegistryFriendlyByteBuf, T> factory) {
+        return serverToClient(id, StreamCodec.ofMember(Packet::toBuffer, factory::apply));
     }
 
     /**
@@ -89,7 +89,7 @@ public interface SimpleNetworking {
      *
      * @return A registered PacketType
      */
-    static <T> S2CPacketType<T> serverToClient(Identifier id, PacketCodec<? super RegistryByteBuf, T> codec) {
+    static <T> S2CPacketType<T> serverToClient(Identifier id, StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
             return ClientSimpleNetworkingImpl.register(id, codec);
         }
