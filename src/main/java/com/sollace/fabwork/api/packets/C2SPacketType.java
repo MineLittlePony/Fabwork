@@ -39,15 +39,6 @@ public record C2SPacketType<T> (
     }
 
     /**
-     * @deprecated Will be removed in MC1.22
-     */
-    @SuppressWarnings("unchecked")
-    @Deprecated(forRemoval = true)
-    public void sendToServer(Packet payload) {
-        sendToServer((T)payload);
-    }
-
-    /**
      * Creates a single-use callback to invoke when receiving a packet from a particular client.
      * The returned future will either complete successfully with the incoming packet,
      * or fail upon a timeout or closed connection.
@@ -68,15 +59,5 @@ public record C2SPacketType<T> (
     public net.minecraft.network.protocol.Packet<ServerCommonPacketListener> toPacket(T payload) {
         Objects.requireNonNull(payload, "Payload cannot be null");
         return ClientSimpleNetworkingImpl.createC2SPacket(new Payload<>(payload, id));
-    }
-
-
-    /**
-     * @deprecated Will be removed in MC1.22
-     */
-    @SuppressWarnings("unchecked")
-    @Deprecated(forRemoval = true)
-    public net.minecraft.network.protocol.Packet<ServerCommonPacketListener> toPacket(Packet payload) {
-        return toPacket((T)payload);
     }
 }

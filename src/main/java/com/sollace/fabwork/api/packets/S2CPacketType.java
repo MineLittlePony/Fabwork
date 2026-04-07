@@ -26,15 +26,6 @@ public record S2CPacketType<T> (
         ServerPlayNetworking.send(recipient, new Payload<>(packet, id));
     }
 
-    /**
-     * @deprecated Will be removed in MC1.22
-     */
-    @SuppressWarnings("unchecked")
-    @Deprecated(forRemoval = true)
-    public void sendToPlayer(Packet packet, ServerPlayer recipient) {
-        sendToPlayer((T)packet, recipient);
-    }
-
     public void sendToAllPlayers(T packet, Level world) {
         Objects.requireNonNull(world, "Server world cannot be null");
         var p = toPacket(packet);
@@ -45,29 +36,11 @@ public record S2CPacketType<T> (
         });
     }
 
-    /**
-     * @deprecated Will be removed in MC1.22
-     */
-    @SuppressWarnings("unchecked")
-    @Deprecated(forRemoval = true)
-    public void sendToAllPlayers(Packet packet, Level world) {
-        sendToAllPlayers((T)packet, world);
-    }
-
     public void sendToSurroundingPlayers(T packet, Entity entity) {
         Objects.requireNonNull(entity, "Entity cannot be null");
         if (entity.level() instanceof ServerLevel sw) {
             sw.getChunkSource().sendToTrackingPlayersAndSelf(entity, toPacket(packet));
         }
-    }
-
-    /**
-     * @deprecated Will be removed in MC1.22
-     */
-    @SuppressWarnings("unchecked")
-    @Deprecated(forRemoval = true)
-    public void sendToSurroundingPlayers(Packet packet, Entity entity) {
-        sendToSurroundingPlayers((T)packet, entity);
     }
 
     public void sendToAllPlayers(T packet, MinecraftServer server) {
@@ -79,28 +52,10 @@ public record S2CPacketType<T> (
     }
 
     /**
-     * @deprecated Will be removed in MC1.22
-     */
-    @SuppressWarnings("unchecked")
-    @Deprecated(forRemoval = true)
-    public void sendToAllPlayers(Packet packet, MinecraftServer server) {
-        sendToAllPlayers((T)packet, server);
-    }
-
-    /**
      * Repackages a fabwork packet into a normal Minecraft protocol packet suitable for sending to a connected client.
      */
     public net.minecraft.network.protocol.Packet<ClientCommonPacketListener> toPacket(T packet) {
         Objects.requireNonNull(packet, "Packet cannot be null");
         return ServerPlayNetworking.createClientboundPacket(new Payload<>(packet, id));
-    }
-
-    /**
-     * @deprecated Will be removed in MC1.22
-     */
-    @SuppressWarnings("unchecked")
-    @Deprecated(forRemoval = true)
-    public net.minecraft.network.protocol.Packet<ClientCommonPacketListener> toPacket(Packet packet) {
-        return toPacket((T)packet);
     }
 }

@@ -1,7 +1,5 @@
 package com.sollace.fabwork.api.packets;
 
-import java.util.function.Function;
-
 import com.sollace.fabwork.impl.packets.*;
 
 import net.fabricmc.api.EnvType;
@@ -37,45 +35,12 @@ public interface SimpleNetworking {
      *
      * @param <T>     The type of packet to implement
      * @param id      The message's unique identifier used for serialization
-     * @param factory A constructor returning new instances of the packet type
-     *
-     * @return A registered PacketType
-     */
-    @Deprecated
-    static <T extends Packet> C2SPacketType<T> clientToServer(Identifier id, Function<? super RegistryFriendlyByteBuf, T> factory) {
-        return clientToServer(id, StreamCodec.ofMember(Packet::toBuffer, factory::apply));
-    }
-
-    /**
-     * Registers a packet type for transmisison to the server.
-     * <p>
-     * The returned handle can be used by the client to send messages to the active minecraft server.
-     * <p>
-     *
-     * @param <T>     The type of packet to implement
-     * @param id      The message's unique identifier used for serialization
      * @param codec   A packet codec used for serializing the packet on both sides
      *
      * @return A registered PacketType
      */
     static <T> C2SPacketType<T> clientToServer(Identifier id, StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
         return ServerSimpleNetworkingImpl.registerC2S(id, codec);
-    }
-
-    /**
-     * Registers a packet type for transmission to the client.
-     *
-     * The returned handle can be used by the server to send messages to a given recipient.
-     *
-     * @param <T>     The type of packet to implement
-     * @param id      The message's unique identifier used for serialization
-     * @param factory A constructor returning new instances of the packet type
-     *
-     * @return A registered PacketType
-     */
-    @Deprecated
-    static <T extends Packet> S2CPacketType<T> serverToClient(Identifier id, Function<? super RegistryFriendlyByteBuf, T> factory) {
-        return serverToClient(id, StreamCodec.ofMember(Packet::toBuffer, factory::apply));
     }
 
     /**
