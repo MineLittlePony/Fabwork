@@ -18,7 +18,7 @@ If all you need from fabwork is the validation aspect, then there are no code ch
 Any mods that include the optional "fabwork" custom attribute in their fabric.mod.json will be considered when joining a server.
 
 fabric.mod.json
-```
+```json
 {
   "custom": {
       "fabwork": {
@@ -36,7 +36,7 @@ If you have Fabwork installed on the server, you can specify additional join req
 Mod ids added to the "requiredModIds" list will be automatically included when determining whether a client is able to connect.
 
 fabwork.json
-```
+```json
 {
   "requiredModIds": [
     "fabric-api", ...
@@ -46,62 +46,50 @@ fabwork.json
 
 ## Networking Abstraction
 
-For more advanced betworking tools, look into the included SimpleNetworking class.
-To register packets, call either SimpleNetworking.clientToServer or SimpleNetworking.serverToClient and store the returned type statically
+For more advanced networking tools, look into the included SimpleNetworking class.
+To register packets, call either `SimpleNetworking.clientToServer` or `SimpleNetworking.serverToClient` and store the returned type statically
 like you would a block or item.
 
-```
+```java
 class ExampleMod implements ModInitializer {
   // registration
   C2SPacketType<ExampleServerBoundPacket> EXAMPLE_SERVER_BOUND = SimpleNetworking.clientToServer(new Identifier("modid", "example_server_bound"), ExampleServerBoundPacket::new);
   S2CPacketType<ExampleClientBoundPacket> EXAMPLE_CLIENT_BOUND = SimpleNetworking.serverToClient(new Identifier("modid", "example_client_bound"), ExampleClientBoundPacket::new);
   @Override
   public void onInitialize() {
-    // send packet to client
-    EXAMPLE.sendToPlayer(new ExampleClientBoundPacket(1), aServerPlayerEntity);
+     EXAMPLE_SERVER_BOUND.receiver().addPersistentHandler((sender, packet) -> {
+       // callback executed when receiving your packet
+     });
+     // send packet to client
+     EXAMPLE.sendToPlayer(new ExampleClientBoundPacket(1), aServerPlayerEntity);
   }
 }
 
 class ExampleModClient implements ClientModInitializer {
   @Override
   public void onInitializeClient() {
-    EXAMPLE_CLIENT_BOUND.receiver().addPersistentListener(this::onExamplePacket);
+     EXAMPLE_CLIENT_BOUND.receiver().addPersistentListener(this::onExamplePacket);
   }
 
-  private void onExamplePacket(PlayerEntity sender, ExampleClientBoundPacket packet) {
-      // do something
-      // send packet to server
-      EXAMPLE.sendToServer(new ExampleServerBoundPacket(packet.parameter));
+  private void onExamplePacket(Player sender, ExampleClientBoundPacket packet) {
+    // do something
+    // send packet to server
+    EXAMPLE.sendToServer(new ExampleServerBoundPacket(packet.parameter));
   }
 }
 
-record ExampleServerBoundPacket (int parameter) implements HandledPacket<ServerPlayerEntity> {
-  ExampleServerBoundPacket(PacketByteBuf buffer) {
-    this(buffer.readInt());
-  }
-
-  @Override
-  public void toBuffer(PacketByteBuf buffer) {
-    buffer.writeInt(parameter);
-  }
-
-  // packets can optionally include their own handle method
-  // or you can defer handler registration to the receiver (helpful for server/client code separation)
-  @Override
-  public void handle(ServerPlayerEntity sender) {
-    // callback executed when receiving your packet
-  }
+record ExampleServerBoundPacket (int parameter) {
+  public static final StreamCodec<ExampleServerBoundPacket> STREAM_CODEC = StreamCodec.composite(
+     ByteBufCodecs.INT, ExampleServerBoundPacket::parameter,
+     ExampleServerBoundPacket::new
+  );
 }
 
-record ExampleClientBoundPacket (int parameter) implements Packet {
-  ExampleClientBoundPacket(PacketByteBuf buffer) {
-    this(buffer.readInt());
-  }
-
-  @Override
-  public void toBuffer(PacketByteBuf buffer) {
-    buffer.writeInt(parameter);
-  }
+record ExampleClientBoundPacket (int parameter) {
+  public static final StreamCodec<ExampleClientBoundPacket> STREAM_CODEC = StreamCodec.composite(
+     ByteBufCodecs.INT, ExampleClientBoundPacket::parameter,
+     ExampleClientBoundPacket::new
+  );
 }
 ```
 
