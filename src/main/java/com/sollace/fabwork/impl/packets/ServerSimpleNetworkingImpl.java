@@ -22,7 +22,7 @@ public class ServerSimpleNetworkingImpl {
     public static <T> C2SPacketType<T> registerC2S(Identifier id, StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
         var packetId = new CustomPacketPayload.Type<Payload<T>>(id);
         var type = new C2SPacketType<>(packetId, Payload.createCodec(packetId, codec), new ReceiverImpl<>(id));
-        PayloadTypeRegistry.clientboundPlay().register(packetId, type.codec());
+        PayloadTypeRegistry.serverboundPlay().register(packetId, type.codec());
         ServerPlayNetworking.registerGlobalReceiver(packetId, (payload, context) -> {
             context.player().level().getServer().execute(() -> ((ReceiverImpl<ServerPlayer, T>)type.receiver()).onReceive(context.player(), payload.packet()));
         });
@@ -32,7 +32,7 @@ public class ServerSimpleNetworkingImpl {
     public static <T> S2CPacketType<T> registerS2C(Identifier id, StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
         var packetId = new CustomPacketPayload.Type<Payload<T>>(id);
         var type = new S2CPacketType<>(packetId, Payload.createCodec(packetId, codec), Receivers.empty(id));
-        PayloadTypeRegistry.serverboundPlay().register(packetId, type.codec());
+        PayloadTypeRegistry.clientboundPlay().register(packetId, type.codec());
         return type;
     }
 
